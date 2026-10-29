@@ -1,0 +1,1578 @@
+<!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Newsletter Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@500;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+/* Layout: two-pane studio — issue editor on the left, live outputs (email, social, text, plain) on the right; stacks on phones. */
+:root{
+  --navy:#142E54;
+  --gold:#E0A23B;
+  --paper:#F6F4EF;
+  --surface:#FFFFFF;
+  --ink:#16202F;
+  --muted:#5B6576;
+  --line:#DCD8CE;
+  --soft:#ECE8DF;
+  --focus:#2F6FD1;
+  --ok:#2E7D4F;
+  --warn:#A8620B;
+  --display:'Domine', Georgia, serif;
+  --body:'Nunito Sans', Arial, sans-serif;
+  --mono:ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10161F; --surface:#18212D; --ink:#E9EDF3; --muted:#9AA6B6; --line:#2B3747; --soft:#1F2A38; --focus:#7FAEF5; --ok:#6FCB95; --warn:#F0B35A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10161F; --surface:#18212D; --ink:#E9EDF3; --muted:#9AA6B6; --line:#2B3747; --soft:#1F2A38; --focus:#7FAEF5; --ok:#6FCB95; --warn:#F0B35A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.topbar{background:var(--navy);color:#F6F4EF;padding-block:14px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.topbar-in{max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.brandmark{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brandmark h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;line-height:1.15;text-wrap:balance}
+.brandmark p{margin:0;color:#C9D3E3;font-size:13px}
+.bar-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.save-state{font-size:12.5px;color:#C9D3E3;min-width:90px}
+.btn{font:inherit;font-weight:700;font-size:14px;border-radius:8px;padding:9px 14px;border:1px solid transparent;cursor:pointer;line-height:1.2;display:inline-flex;align-items:center;gap:6px}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible,[role=tab]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn-gold{background:var(--gold);color:#142E54}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-ghost-light{background:transparent;color:#F6F4EF;border-color:rgba(246,244,239,.4)}
+.btn-ghost-light:hover{background:rgba(255,255,255,.08)}
+.btn-line{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn-line:hover{border-color:var(--muted)}
+.btn-navy{background:var(--navy);color:#F6F4EF}
+:root[data-theme="dark"] .btn-navy{background:#2A4A7A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn-navy{background:#2A4A7A}}
+.btn-navy:hover{filter:brightness(1.12)}
+.studio{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;padding-block:24px 48px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+@media (max-width:980px){.studio{grid-template-columns:minmax(0,1fr)}}
+.editor{display:flex;flex-direction:column;gap:10px;min-width:0}
+.editor-intro{font-size:13.5px;color:var(--muted);margin:0 0 4px}
+details.group{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.group>summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800;font-size:14.5px}
+details.group>summary::-webkit-details-marker{display:none}
+details.group>summary .hint{font-weight:600;font-size:12px;color:var(--muted)}
+details.group>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);flex:none;margin-top:-4px}
+details.group[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.fields{display:flex;flex-direction:column;gap:12px;padding:0 16px 16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.row2{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.01em;min-width:0}
+label.f .sub{font-weight:600;color:var(--muted);opacity:.85}
+input[type=text],input[type=url],input[type=number],textarea,select{font:inherit;font-size:14.5px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:64px;line-height:1.45}
+input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:7px;background:var(--paper);padding:2px;cursor:pointer}
+.color-row{display:flex;gap:10px;align-items:center}
+.color-row label.f{flex:1}
+.check{display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:600;color:var(--ink)}
+.check input{width:18px;height:18px;accent-color:var(--navy)}
+.subhead{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 0 -4px}
+.output{min-width:0;display:flex;flex-direction:column;gap:14px}
+.out-sticky{position:sticky;top:env(safe-area-inset-top, 0px);display:flex;flex-direction:column;gap:14px}
+@media (max-width:980px){.out-sticky{position:static}}
+.tabs{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:10px;overflow-x:auto}
+.tabs [role=tab]{font:inherit;font-weight:700;font-size:14px;background:transparent;color:var(--muted);border:0;border-radius:7px;padding:8px 14px;cursor:pointer;white-space:nowrap;flex:1}
+.tabs [role=tab][aria-selected=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.panel-head h2{font-family:var(--display);font-size:18px;margin:0;font-weight:700}
+.panel-note{font-size:13px;color:var(--muted);margin:0;max-width:70ch}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;font-weight:700;padding:7px 12px;background:var(--surface);color:var(--muted);border:0;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--navy);color:#F6F4EF}
+.frame-wrap{background:var(--soft);border-radius:10px;padding:16px 8px;display:flex;justify-content:center;overflow:auto}
+.frame-wrap iframe{border:0;background:#FFFFFF;width:100%;max-width:640px;height:900px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.08);transition:max-width .25s ease}
+.frame-wrap.mobile iframe{max-width:375px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card-out{display:flex;flex-direction:column;gap:8px;min-width:0}
+.card-out img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:var(--soft)}
+.card-out .cap{font-size:12.5px;font-weight:700;color:var(--muted)}
+.capt{display:flex;flex-direction:column;gap:6px;min-width:0}
+.capt-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.capt-head strong{font-size:14px}
+.count{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted)}
+.count.over{color:var(--warn)}
+.capt textarea{min-height:120px;font-size:14px;background:var(--paper)}
+.capt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.sms-phone{max-width:360px;background:var(--soft);border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:8px}
+.sms-bubble{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:14.5px;white-space:pre-wrap;word-break:break-word;max-width:92%}
+.sms-meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sms-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:20px;align-items:start}
+@media (max-width:760px){.sms-grid{grid-template-columns:minmax(0,1fr)}}
+pre.code{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;max-height:520px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:20}
+.badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--gold);color:#142E54}
+.checklist{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.checklist .ok{color:var(--ok);font-weight:700}
+.checklist .no{color:var(--warn);font-weight:700}
+/* Preview mockups use each platform's own light look in both themes */
+.pv-picks{display:flex;flex-wrap:wrap;gap:6px}
+.pv-picks button{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pv-picks button[aria-pressed=true]{background:var(--navy);color:#F6F4EF;border-color:var(--navy)}
+.pv-stage{background:var(--soft);border-radius:12px;padding:24px 12px;display:flex;justify-content:center;align-items:flex-start;min-height:420px;overflow-x:auto}
+.pv-pair{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start}
+.pv-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;margin:0 0 8px}
+.phone{width:340px;max-width:100%;background:#FFFFFF;color:#111827;border:10px solid #0E1116;border-radius:38px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.18);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:14px;line-height:1.4}
+.phone iframe{border:0;width:100%;height:640px;display:block;background:#EDEAE3}
+.pv-status{display:flex;justify-content:space-between;padding:8px 20px 4px;font-size:12px;font-weight:700;color:#111827}
+.pv-apptitle{font-size:26px;font-weight:800;padding:4px 16px 10px;color:#111827}
+.pv-av{flex:none;width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;font-family:Arial,sans-serif}
+.pv-av.sm{width:30px;height:30px;font-size:11px}
+.pv-mail{display:flex;gap:10px;padding:12px 16px;border-top:1px solid #E5E7EB;background:#FFFFFF}
+.pv-mail.new{background:#F2F6FD}
+.pv-mail-body{flex:1;min-width:0}
+.pv-mail-who{display:flex;justify-content:space-between;gap:8px;color:#111827}
+.pv-mail-who span{color:#6B7280;font-size:12px;flex:none}
+.pv-mail-subj{font-weight:700;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-mail-pre{color:#6B7280;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pv-skel{height:10px;border-radius:5px;background:#E5E7EB;margin:6px 0}
+.pv-ig-top{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;font-weight:800;font-size:18px;color:#111827}
+.pv-head{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#111827}
+.pv-head b{font-size:14px}
+.pv-head small{display:block;color:#6B7280;font-size:12px;font-weight:400}
+.pv-car{position:relative;width:100%;background:#0E1116;overflow:hidden}
+.pv-car img{display:block;width:100%;height:100%;object-fit:cover}
+.pv-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#111827;font-weight:800;font-size:16px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.pv-nav.prev{left:8px}
+.pv-nav.next{right:8px}
+.pv-count{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.62);color:#FFFFFF;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px}
+.pv-dots{display:flex;gap:4px;justify-content:center;padding:8px 0 2px}
+.pv-dots span{width:6px;height:6px;border-radius:50%;background:#C7CCD4}
+.pv-dots span.on{background:#3B82F6}
+.pv-icons{display:flex;gap:16px;padding:6px 12px 4px;color:#111827}
+.pv-icons svg{width:24px;height:24px}
+.pv-cap{padding:4px 12px 16px;white-space:pre-wrap;word-break:break-word;color:#111827}
+.pv-more{font:inherit;border:0;background:none;padding:0;color:#6B7280;cursor:pointer}
+.pv-feed{width:500px;max-width:100%;background:#FFFFFF;color:#111827;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.12);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:14.5px;line-height:1.45;overflow:hidden}
+.pv-text{padding:0 14px 12px;white-space:pre-wrap;word-break:break-word;color:#111827}
+.pv-bar{display:flex;justify-content:space-around;border-top:1px solid #E5E7EB;padding:10px 6px;color:#4B5563;font-weight:700;font-size:13px}
+.pv-thread{display:flex;gap:10px;padding:16px 16px 10px}
+.pv-thread .pv-body{flex:1;min-width:0}
+.pv-thread .who{color:#111827}
+.pv-thread .who span{color:#6B7280}
+.pv-thread .txt{white-space:pre-wrap;word-break:break-word;margin-top:2px;color:#111827}
+.pv-thread img{display:block;width:100%;border-radius:14px;border:1px solid #E5E7EB;margin-top:10px}
+.pv-thread .acts{display:flex;gap:26px;color:#6B7280;font-size:13px;padding:10px 0 4px}
+.pv-limit{font-size:12px;font-weight:700;padding:0 16px 14px;color:#6B7280}
+.pv-limit.over{color:#B45309}
+.pv-story{position:relative;width:300px;max-width:100%;aspect-ratio:9/16;border-radius:24px;overflow:hidden;background:#000000;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.pv-story img{width:100%;height:100%;object-fit:cover;display:block}
+.pv-bars{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px}
+.pv-bars span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.4)}
+.pv-bars span.on{background:#FFFFFF}
+.pv-story .who{position:absolute;top:22px;left:12px;display:flex;align-items:center;gap:8px;color:#FFFFFF;font-weight:700;font-size:13px;font-family:Arial,sans-serif}
+.pv-tap{position:absolute;top:0;bottom:0;width:40%;border:0;background:transparent;cursor:pointer}
+.pv-tap.l{left:0}
+.pv-tap.r{right:0}
+.pv-story .tt{position:absolute;left:0;right:0;bottom:0;padding:48px 14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.78));color:#FFFFFF;font-size:13px;font-family:Arial,sans-serif;white-space:pre-wrap;pointer-events:none}
+.pv-browser{width:640px;max-width:100%;background:#F6F4EF;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+.pv-browser .bar{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#E7E3DA}
+.pv-browser .bar i{width:10px;height:10px;border-radius:50%;background:#C9C3B6;display:inline-block;flex:none}
+.pv-browser .url{flex:1;min-width:0;background:#FFFFFF;border-radius:6px;padding:4px 10px;font-size:12px;color:#5B6576;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Arial,sans-serif}
+.pv-browser .page{padding:28px 16px;color:#16202F}
+.pv-sms{padding:10px 12px 24px;display:flex;flex-direction:column;gap:6px;min-height:420px;background:#FFFFFF}
+.pv-sms .from{text-align:center;color:#6B7280;font-size:12px;padding-bottom:6px}
+.pv-sms .bub{align-self:flex-start;max-width:82%;background:#E9E9EB;color:#111827;border-radius:18px;padding:9px 13px;white-space:pre-wrap;word-break:break-word}
+.pv-sms .meta{color:#6B7280;font-size:11.5px;padding-left:6px}
+.pv-empty{color:var(--muted);font-size:14px;padding:40px 16px;text-align:center}
+.flip-list{display:flex;flex-direction:column;gap:12px}
+.flip-item{border:1px solid var(--line);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
+.flip-item input[type=text],.flip-item textarea{background:var(--surface)}
+.flip-item-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.flip-item-head strong{font-size:13.5px}
+.flip-tools{display:flex;gap:4px}
+.flip-tools button{font:inherit;font-size:12.5px;font-weight:700;padding:5px 9px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.flip-tools button:disabled{opacity:.4;cursor:default}
+.flip-tools button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brandmark">
+      <h1>Newsletter Studio</h1>
+      <p>Write the issue once. Get the email, social posts and text message.</p>
+    </div>
+    <div class="bar-actions">
+      <span class="save-state" id="saveState" aria-live="polite"></span>
+      <button class="btn btn-ghost-light" id="btnSample" type="button">Load sample issue</button>
+      <button class="btn btn-ghost-light" id="btnClear" type="button">Start blank</button>
+    </div>
+  </div>
+</header>
+
+<main class="studio">
+  <form class="editor" id="editor" autocomplete="off">
+    <p class="editor-intro">Fill in what you need; empty sections are left out of every version automatically. Your draft saves in this browser as you type.</p>
+
+    <details class="group" open>
+      <summary>Brand and issue <span class="hint">masthead</span></summary>
+      <div class="fields">
+        <label class="f">Newsletter name<input type="text" id="brand" data-k="brand"></label>
+        <label class="f">Tagline<input type="text" id="tagline" data-k="tagline"></label>
+        <div class="row2">
+          <label class="f">Issue number<input type="text" id="issue" data-k="issue"></label>
+          <label class="f">Issue date<input type="text" id="date" data-k="date"></label>
+        </div>
+        <div class="color-row">
+          <input type="color" id="c1" data-k="c1" aria-label="Primary color">
+          <label class="f" for="c1">Primary color <span class="sub">header, headings, footer</span></label>
+          <input type="color" id="c2" data-k="c2" aria-label="Accent color">
+          <label class="f" for="c2">Accent <span class="sub">buttons, labels</span></label>
+        </div>
+        <label class="f">Social handle <span class="sub">shown on social graphics</span><input type="text" id="handle" data-k="handle"></label>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>Headline and opener <span class="hint">all versions</span></summary>
+      <div class="fields">
+        <label class="f">Headline<textarea id="headline" data-k="headline" rows="2"></textarea></label>
+        <label class="f">Preview text <span class="sub">shown after the subject line in inboxes</span><input type="text" id="preheader" data-k="preheader"></label>
+        <label class="f">Opening note<textarea id="intro" data-k="intro" rows="3"></textarea></label>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>Featured story</summary>
+      <div class="fields">
+        <label class="f">Title<input type="text" id="fTitle" data-k="fTitle"></label>
+        <label class="f">Summary<textarea id="fBody" data-k="fBody" rows="3"></textarea></label>
+        <label class="f">Image link <span class="sub">optional, a public https image address</span><input type="url" id="fImg" data-k="fImg" placeholder="https://"></label>
+        <div class="row2">
+          <label class="f">Button text<input type="text" id="fBtn" data-k="fBtn"></label>
+          <label class="f">Button link<input type="url" id="fUrl" data-k="fUrl" placeholder="https://"></label>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Know your rights tip</summary>
+      <div class="fields">
+        <label class="f">Tip headline<input type="text" id="tTitle" data-k="tTitle"></label>
+        <label class="f">Explanation<textarea id="tBody" data-k="tBody" rows="3"></textarea></label>
+        <label class="f">Citation<input type="text" id="tCite" data-k="tCite"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Deadline to know</summary>
+      <div class="fields">
+        <div class="row2">
+          <label class="f">Number<input type="text" id="dNum" data-k="dNum"></label>
+          <label class="f">Unit<input type="text" id="dUnit" data-k="dUnit"></label>
+        </div>
+        <label class="f">What it's for<textarea id="dBody" data-k="dBody" rows="2"></textarea></label>
+        <label class="f">Citation<input type="text" id="dCite" data-k="dCite"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Flip cards <span class="hint">myth vs. fact, as many as you want</span></summary>
+      <div class="fields">
+        <p class="panel-note" style="margin:0">On your website each card flips back and forth every time it's tapped. In email each card shows its front and answer stacked, since email apps can't run flip effects. On social each card becomes a front slide and an answer slide.</p>
+        <div class="row2">
+          <label class="f">Front label <span class="sub">all cards</span><input type="text" id="flipFL" data-k="flipFL"></label>
+          <label class="f">Back label <span class="sub">all cards</span><input type="text" id="flipBL" data-k="flipBL"></label>
+        </div>
+        <div id="flipList" class="flip-list"></div>
+        <button class="btn btn-line" type="button" id="flipAdd" style="align-self:flex-start">+ Add another card</button>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Quick links <span class="hint">up to 3</span></summary>
+      <div class="fields">
+        <div class="row2"><label class="f">Link 1 text<input type="text" id="q1t" data-k="q1t"></label><label class="f">Link 1 address<input type="url" id="q1u" data-k="q1u" placeholder="https://"></label></div>
+        <div class="row2"><label class="f">Link 2 text<input type="text" id="q2t" data-k="q2t"></label><label class="f">Link 2 address<input type="url" id="q2u" data-k="q2u" placeholder="https://"></label></div>
+        <div class="row2"><label class="f">Link 3 text<input type="text" id="q3t" data-k="q3t"></label><label class="f">Link 3 address<input type="url" id="q3u" data-k="q3u" placeholder="https://"></label></div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Watch or listen, and next event</summary>
+      <div class="fields">
+        <p class="subhead">Watch or listen</p>
+        <label class="f">Episode or video title<input type="text" id="wTitle" data-k="wTitle"></label>
+        <label class="f">Link<input type="url" id="wUrl" data-k="wUrl" placeholder="https://"></label>
+        <p class="subhead">Upcoming event</p>
+        <label class="f">Event name<input type="text" id="eTitle" data-k="eTitle"></label>
+        <label class="f">Date, time and place<input type="text" id="eWhen" data-k="eWhen"></label>
+        <label class="f">Registration link<input type="url" id="eUrl" data-k="eUrl" placeholder="https://"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Reader poll <span class="hint">interactive</span></summary>
+      <div class="fields">
+        <label class="f">Question<input type="text" id="pQ" data-k="pQ"></label>
+        <div class="row2"><label class="f">Answer 1<input type="text" id="pA1" data-k="pA1"></label><label class="f">Answer 2<input type="text" id="pA2" data-k="pA2"></label></div>
+        <label class="f">Answer 3 <span class="sub">optional</span><input type="text" id="pA3" data-k="pA3"></label>
+        <label class="f">Answer link <span class="sub">each button opens this page with ?answer= added, so clicks can be counted</span><input type="url" id="pUrl" data-k="pUrl" placeholder="https://"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Call to action</summary>
+      <div class="fields">
+        <label class="f">Heading<input type="text" id="cHead" data-k="cHead"></label>
+        <label class="f">Supporting line<input type="text" id="cBody" data-k="cBody"></label>
+        <div class="row2">
+          <label class="f">Button text<input type="text" id="cBtn" data-k="cBtn"></label>
+          <label class="f">Button link<input type="url" id="cUrl" data-k="cUrl" placeholder="https://"></label>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Social links and footer <span class="hint">required for email</span></summary>
+      <div class="fields">
+        <div class="row2"><label class="f">Website<input type="url" id="sWeb" data-k="sWeb" placeholder="https://"></label><label class="f">TikTok<input type="url" id="sTik" data-k="sTik" placeholder="https://"></label></div>
+        <div class="row2"><label class="f">Instagram<input type="url" id="sIg" data-k="sIg" placeholder="https://"></label><label class="f">Facebook<input type="url" id="sFb" data-k="sFb" placeholder="https://"></label></div>
+        <div class="row2"><label class="f">YouTube<input type="url" id="sYt" data-k="sYt" placeholder="https://"></label><label class="f">Threads<input type="url" id="sTh" data-k="sTh" placeholder="https://"></label></div>
+        <label class="f">Substack<input type="url" id="sSub" data-k="sSub" placeholder="https://"></label>
+        <label class="f">Mailing address <span class="sub">required in marketing email (CAN-SPAM)</span><input type="text" id="addr" data-k="addr"></label>
+        <label class="f">Unsubscribe tag <span class="sub">use your email tool's tag, e.g. *|UNSUB|* in Mailchimp</span><input type="text" id="unsub" data-k="unsub"></label>
+        <label class="f">Why they're receiving this<input type="text" id="why" data-k="why"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Text message settings</summary>
+      <div class="fields">
+        <label class="f">Sender name <span class="sub">starts the text so people know who it's from</span><input type="text" id="smsFrom" data-k="smsFrom"></label>
+        <label class="f">Link for texts <span class="sub">a short link works best</span><input type="url" id="smsUrl" data-k="smsUrl" placeholder="https://"></label>
+        <label class="check"><input type="checkbox" id="smsStop" data-k="smsStop"> Add "Reply STOP to opt out"</label>
+      </div>
+    </details>
+  </form>
+
+  <section class="output" aria-label="Outputs">
+    <div class="out-sticky">
+      <div class="tabs" role="tablist" aria-label="Output format">
+        <button role="tab" id="tab-preview" aria-controls="p-preview" aria-selected="true" type="button">Preview</button>
+        <button role="tab" id="tab-email" aria-controls="p-email" aria-selected="false" type="button" tabindex="-1">Email</button>
+        <button role="tab" id="tab-social" aria-controls="p-social" aria-selected="false" type="button" tabindex="-1">Social posts</button>
+        <button role="tab" id="tab-sms" aria-controls="p-sms" aria-selected="false" type="button" tabindex="-1">Text message</button>
+        <button role="tab" id="tab-plain" aria-controls="p-plain" aria-selected="false" type="button" tabindex="-1">Plain text</button>
+        <button role="tab" id="tab-web" aria-controls="p-web" aria-selected="false" type="button" tabindex="-1">Website card</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-preview" aria-labelledby="tab-preview">
+        <div class="panel-head"><h2>Preview</h2></div>
+        <p class="panel-note">See each version the way people will see it before you post. Tap the arrows to move through carousel slides, and "more" to open captions.</p>
+        <div class="pv-picks" role="group" aria-label="Choose where to preview">
+          <button type="button" data-pv="inbox" aria-pressed="true">Email inbox</button>
+          <button type="button" data-pv="instagram" aria-pressed="false">Instagram</button>
+          <button type="button" data-pv="facebook" aria-pressed="false">Facebook</button>
+          <button type="button" data-pv="story" aria-pressed="false">Story / TikTok</button>
+          <button type="button" data-pv="threads" aria-pressed="false">Threads</button>
+          <button type="button" data-pv="x" aria-pressed="false">X</button>
+          <button type="button" data-pv="linkedin" aria-pressed="false">LinkedIn</button>
+          <button type="button" data-pv="text" aria-pressed="false">Text message</button>
+          <button type="button" data-pv="web" aria-pressed="false">Website flip card</button>
+        </div>
+        <div class="pv-stage" id="pvStage" aria-live="polite"></div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-email" aria-labelledby="tab-email" hidden>
+        <div class="panel-head">
+          <h2>Email</h2>
+          <div class="seg" role="group" aria-label="Preview width">
+            <button type="button" id="wDesk" aria-pressed="true">Desktop</button>
+            <button type="button" id="wMob" aria-pressed="false">Phone</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-navy" type="button" id="copyRich">Copy formatted</button>
+          <button class="btn btn-line" type="button" id="copyHtml">Copy HTML code</button>
+          <button class="btn btn-line" type="button" id="dlHtml" hidden>Download .html</button>
+        </div>
+        <p class="panel-note"><b>Copy formatted</b> pastes the designed email into Substack, Gmail or Outlook. <b>Copy HTML code</b> goes into the custom-code or HTML block of Mailchimp, Kit, Beehiiv, Constant Contact and similar tools.</p>
+        <div class="frame-wrap" id="frameWrap"><iframe id="emailFrame" title="Email preview" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>
+        <div>
+          <p class="subhead" style="margin-bottom:6px">Before you send</p>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-social" aria-labelledby="tab-social" hidden>
+        <div class="panel-head"><h2>Social posts</h2><span class="badge">1080 px wide</span></div>
+        <p class="panel-note">Graphics are drawn from your issue. Feed size (4:5) fits Instagram, Facebook, Threads and LinkedIn; story size (9:16) fits Stories, Reels and TikTok covers. Post them together as a carousel; the flip card's front and back go in order so readers swipe for the answer.</p>
+        <div class="seg" role="group" aria-label="Graphic size">
+          <button type="button" id="szFeed" aria-pressed="true">Feed 4:5</button>
+          <button type="button" id="szStory" aria-pressed="false">Story 9:16</button>
+        </div>
+        <div class="cards" id="cards"></div>
+        <p class="panel-note" id="saveHint">Save a graphic with its button, or right-click (long-press on a phone) the image.</p>
+        <div class="capt-grid" id="captions"></div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-sms" aria-labelledby="tab-sms" hidden>
+        <div class="panel-head"><h2>Text message</h2></div>
+        <div class="sms-grid">
+          <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+            <div class="capt">
+              <div class="capt-head"><strong>Short text (SMS)</strong><span class="count" id="smsCount"></span></div>
+              <textarea id="smsShort" aria-label="Short text message"></textarea>
+              <div class="actions"><button class="btn btn-navy" type="button" data-copy="smsShort">Copy text</button><button class="btn btn-line" type="button" id="smsReset">Rebuild from issue</button></div>
+            </div>
+            <div class="capt">
+              <div class="capt-head"><strong>Longer text (MMS, WhatsApp, group text)</strong><span class="count" id="mmsCount"></span></div>
+              <textarea id="smsLong" aria-label="Longer text message" style="min-height:180px"></textarea>
+              <div class="actions"><button class="btn btn-line" type="button" data-copy="smsLong">Copy text</button></div>
+            </div>
+            <p class="panel-note">One SMS holds 160 plain characters, or 70 if it has emoji or curly quotes. Longer texts split into parts and cost more to send. Only text people who agreed to receive texts from you.</p>
+          </div>
+          <div class="sms-phone" aria-label="Phone preview">
+            <span class="sms-meta" id="smsPrevFrom"></span>
+            <div class="sms-bubble" id="smsBubble"></div>
+            <span class="sms-meta" id="smsSegs"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-plain" aria-labelledby="tab-plain" hidden>
+        <div class="panel-head"><h2>Plain text</h2><button class="btn btn-navy" type="button" data-copy-pre="plainOut">Copy plain text</button></div>
+        <p class="panel-note">Paste this into your email tool's plain-text version. It's also handy for a Substack note, a Facebook group post or a quick email to parents.</p>
+        <pre class="code" id="plainOut"></pre>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-web" aria-labelledby="tab-web" hidden>
+        <div class="panel-head"><h2>Website flip cards</h2></div>
+        <p class="panel-note">Try them here: every card flips back and forth each time you tap it, as many times as you like. They work with a keyboard too, and stay still for visitors who turn off motion.</p>
+        <div id="webLive" style="background:var(--soft);border-radius:10px;padding:24px 12px"></div>
+        <p class="subhead">For your Bolt site (no AI tokens)</p>
+        <p class="panel-note">1. In Bolt's <b>Code</b> tab, make a new file in the <b>components</b> folder named <b>NewsletterFlipCards.tsx</b> and paste this code in. 2. On the page where the cards go, add <code>import NewsletterFlipCards from "./components/NewsletterFlipCards";</code> at the top and <code>&lt;NewsletterFlipCards /&gt;</code> where they should appear. 3. Click Publish. When you change your cards here, copy again and paste over the old code.</p>
+        <div class="actions"><button class="btn btn-navy" type="button" data-copy-pre="reactCode">Copy Bolt code</button></div>
+        <pre class="code" id="reactCode"></pre>
+        <p class="subhead">For other website builders</p>
+        <p class="panel-note">Paste this into a custom HTML or embed block (Ghost, Squarespace, WordPress, Wix and similar). It needs no scripts, so it keeps flipping even when a builder strips them out.</p>
+        <div class="actions"><button class="btn btn-line" type="button" data-copy-pre="webCode">Copy HTML code</button></div>
+        <pre class="code" id="webCode"></pre>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var KEY = 'dhe-newsletter-draft-v1';
+var SITE = 'https://devonhynson.com';
+var today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+var BLANK = {
+  brand:'Devon Hynson Educates', tagline:'Know your rights. Use them on time.', issue:'', date:today,
+  c1:'#142E54', c2:'#E0A23B', handle:'',
+  headline:'', preheader:'', intro:'',
+  fTitle:'', fBody:'', fImg:'', fBtn:'Read more', fUrl:'',
+  tTitle:'', tBody:'', tCite:'',
+  dNum:'', dUnit:'', dBody:'', dCite:'',
+  flipFL:'Myth', flipBL:'Fact', flips:[{f:'', b:'', cite:''}],
+  q1t:'', q1u:'', q2t:'', q2u:'', q3t:'', q3u:'',
+  wTitle:'', wUrl:'', eTitle:'', eWhen:'', eUrl:'',
+  pQ:'', pA1:'', pA2:'', pA3:'', pUrl:'',
+  cHead:'', cBody:'', cBtn:'', cUrl:'',
+  sWeb:SITE, sTik:'', sIg:'', sFb:'', sYt:'', sTh:'', sSub:'',
+  addr:'', unsub:'{{unsubscribe_url}}', why:'You are receiving this because you signed up at Devon Hynson Educates.',
+  smsFrom:'Devon Hynson Educates', smsUrl:'', smsStop:true
+};
+
+var SAMPLE = Object.assign({}, BLANK, {
+  issue:'1', handle:'@[yourhandle]',
+  headline:'Suspended? The 10-day rule every parent of a student with an IEP should know',
+  preheader:'Plus: how to see your child’s records before the next meeting.',
+  intro:'When a school decides to change a student’s placement for discipline, the law requires a review meeting first. Here’s what that meeting is, when it has to happen, and what to bring.',
+  fTitle:'What a manifestation determination review is, and what it isn’t',
+  fBody:'The review asks two questions: was the behavior caused by, or directly and substantially related to, the disability? And was it the direct result of the school not following the IEP? If the answer to either is yes, the school must take specific steps before any long-term removal.',
+  fBtn:'Read the full breakdown', fUrl:SITE + '/blog',
+  tTitle:'You can see your child’s records before an IEP meeting',
+  tBody:'Schools must let parents inspect their child’s education records without unnecessary delay, before any IEP meeting or hearing, and never more than 45 days after the request.',
+  tCite:'34 CFR 300.613',
+  dNum:'10', dUnit:'school days',
+  dBody:'to hold a manifestation determination review after a decision to change a student’s placement for discipline.',
+  dCite:'34 CFR 300.530(e)',
+  flips:[
+    {f:'If the behavior is serious enough, a school can remove a student with an IEP without any review.',
+     b:'A removal of more than 10 school days in a row is a change of placement, and the school must hold a manifestation determination review within 10 school days of that decision. That includes weapons, drug and serious-injury cases.',
+     cite:'34 CFR 300.530 and 300.536'},
+    {f:'Only the school can decide whether my child gets evaluated for special education.',
+     b:'A parent can request an initial evaluation. If the school refuses, it must give you prior written notice explaining why.',
+     cite:'34 CFR 300.301(b) and 300.503'}
+  ],
+  q1t:'Free letter: request your child’s records', q1u:SITE + '/resources',
+  q2t:'Delaware evaluation timelines, explained', q2u:SITE + '/blog',
+  q3t:'Upcoming trainings and workshops', q3u:SITE + '/events',
+  wTitle:'Pragmatic Podcast: [episode title]', wUrl:SITE + '/watch-listen',
+  eTitle:'[Workshop name]', eWhen:'[Day, date · time · online or location]', eUrl:SITE + '/events',
+  pQ:'Has your child been suspended this school year?', pA1:'Yes', pA2:'No', pA3:'Not sure', pUrl:SITE + '/blog',
+  cHead:'Facing a school problem right now?', cBody:'The Student Advocacy Center helps families with IEPs, 504 plans, discipline and records.',
+  cBtn:'Get advocacy help', cUrl:'https://studentadvocacycenter.com',
+  addr:'[Your mailing address — required in marketing email]',
+  smsUrl:SITE + '/blog'
+});
+
+var form = document.getElementById('editor');
+var fields = Array.prototype.slice.call(form.querySelectorAll('[data-k]'));
+var state = load() || clone(SAMPLE);
+var smsTouched = false;
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function normFlips(st){
+  if(!Array.isArray(st.flips)){
+    st.flips = [{f:st.flipF || '', b:st.flipB || '', cite:st.flipCite || ''}];
+  }
+  st.flips = st.flips.filter(function(c){ return c && typeof c === 'object'; }).map(function(c){ return {f:String(c.f || ''), b:String(c.b || ''), cite:String(c.cite || '')}; });
+  if(!st.flips.length) st.flips = [{f:'', b:'', cite:''}];
+  delete st.flipF; delete st.flipB; delete st.flipCite;
+  return st;
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY); if(!raw) return null;
+    var saved = normFlips(JSON.parse(raw)); /* converts a draft saved with the old single card */
+    return Object.assign(clone(BLANK), saved);
+  }catch(e){ return null; }
+}
+var saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){
+    var el = document.getElementById('saveState');
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); el.textContent = 'Draft saved'; }
+    catch(e){ el.textContent = 'Draft not saved in this browser'; }
+  }, 400);
+}
+function fill(){
+  fields.forEach(function(el){
+    var k = el.dataset.k;
+    if(el.type === 'checkbox') el.checked = !!state[k];
+    else el.value = state[k] == null ? '' : state[k];
+  });
+  renderFlipFields();
+}
+function readForm(){
+  fields.forEach(function(el){ state[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; });
+}
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function t(s){ return String(s == null ? '' : s).trim(); }
+function safeUrl(u){
+  u = t(u);
+  if(!u) return '';
+  if(/^(https?:|mailto:)/i.test(u)) return u;
+  if(/^\{\{.*\}\}$|^\*\|.*\|\*$|^%.*%$|^\[.*\]$/.test(u)) return u; /* merge tags */
+  if(/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(u)) return 'https://' + u;
+  return '';
+}
+function hex(c, fallback){ return /^#[0-9a-f]{6}$/i.test(c || '') ? c : fallback; }
+function lum(h){
+  var r = parseInt(h.slice(1,3),16)/255, g = parseInt(h.slice(3,5),16)/255, b = parseInt(h.slice(5,7),16)/255;
+  function f(v){ return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); }
+  return .2126*f(r) + .7152*f(g) + .0722*f(b);
+}
+function onColor(h){ return lum(h) > .4 ? '#142E54' : '#FFFFFF'; }
+function paras(s){ return t(s).split(/\n\s*\n/).filter(Boolean); }
+function socials(s){
+  return [['Website',s.sWeb],['TikTok',s.sTik],['Instagram',s.sIg],['Facebook',s.sFb],['YouTube',s.sYt],['Threads',s.sTh],['Substack',s.sSub]]
+    .map(function(p){ return [p[0], safeUrl(p[1])]; }).filter(function(p){ return p[1]; });
+}
+function quick(s){
+  return [[s.q1t,s.q1u],[s.q2t,s.q2u],[s.q3t,s.q3u]].filter(function(q){ return t(q[0]); });
+}
+function pollAnswers(s){ return [s.pA1,s.pA2,s.pA3].map(t).filter(Boolean); }
+/* flip cards that have both a front and a back */
+function flipCards(s){
+  return (s.flips || []).filter(function(c){ return t(c.f) && t(c.b); });
+}
+function flipLabels(s){ return {FL:t(s.flipFL) || 'Myth', BL:t(s.flipBL) || 'Fact'}; }
+
+/* ---------- flip card editor ---------- */
+var flipHost = document.getElementById('flipList');
+function renderFlipFields(focusIdx){
+  var list = state.flips, n = list.length;
+  flipHost.innerHTML = '';
+  list.forEach(function(c, i){
+    var box = document.createElement('div'); box.className = 'flip-item'; box.setAttribute('role','group'); box.setAttribute('aria-label','Flip card ' + (i + 1));
+    box.innerHTML =
+      '<div class="flip-item-head"><strong>Card ' + (i + 1) + '</strong><div class="flip-tools">' +
+        '<button type="button" data-fmove="-1" aria-label="Move card ' + (i + 1) + ' up"' + (i === 0 ? ' disabled' : '') + '>&#8593;</button>' +
+        '<button type="button" data-fmove="1" aria-label="Move card ' + (i + 1) + ' down"' + (i === n - 1 ? ' disabled' : '') + '>&#8595;</button>' +
+        '<button type="button" data-fdel="1" aria-label="Remove card ' + (i + 1) + '">Remove</button>' +
+      '</div></div>' +
+      '<label class="f">Front (the question or myth)<textarea data-ff="f" rows="2"></textarea></label>' +
+      '<label class="f">Back (the answer or fact)<textarea data-ff="b" rows="3"></textarea></label>' +
+      '<label class="f">Citation<input type="text" data-ff="cite"></label>';
+    box.dataset.fi = i;
+    box.querySelector('[data-ff="f"]').value = c.f;
+    box.querySelector('[data-ff="b"]').value = c.b;
+    box.querySelector('[data-ff="cite"]').value = c.cite;
+    flipHost.appendChild(box);
+  });
+  if(focusIdx != null){
+    var target = flipHost.children[focusIdx];
+    if(target){ var ta = target.querySelector('[data-ff="f"]'); if(ta) ta.focus(); }
+  }
+}
+flipHost.addEventListener('input', function(e){
+  var ff = e.target.dataset.ff; if(!ff) return;
+  var i = Number(e.target.closest('.flip-item').dataset.fi);
+  if(state.flips[i]) state.flips[i][ff] = e.target.value;
+});
+flipHost.addEventListener('click', function(e){
+  var item = e.target.closest('.flip-item'); if(!item) return;
+  var i = Number(item.dataset.fi), list = state.flips;
+  var mv = e.target.closest('[data-fmove]');
+  if(mv && !mv.disabled){
+    var j = i + Number(mv.dataset.fmove);
+    if(j >= 0 && j < list.length){ var tmp = list[i]; list[i] = list[j]; list[j] = tmp; renderFlipFields(); var b = flipHost.children[j] && flipHost.children[j].querySelector('[data-fmove="' + mv.dataset.fmove + '"]'); if(b && !b.disabled) b.focus(); scheduleRender(); }
+    return;
+  }
+  if(e.target.closest('[data-fdel]')){
+    var hasText = t(list[i].f) || t(list[i].b) || t(list[i].cite);
+    var doDel = function(){
+      list.splice(i, 1);
+      if(!list.length) list.push({f:'', b:'', cite:''});
+      renderFlipFields(); scheduleRender(); toast('Card removed');
+      var next = flipHost.children[Math.min(i, list.length - 1)]; if(next){ var d = next.querySelector('[data-fdel]'); if(d) d.focus(); }
+    };
+    if(hasText) armed(e.target.closest('[data-fdel]'), 'Remove', doDel); else doDel();
+  }
+});
+document.getElementById('flipAdd').addEventListener('click', function(){
+  state.flips.push({f:'', b:'', cite:''});
+  renderFlipFields(state.flips.length - 1); scheduleRender();
+});
+function pollLink(base, ans){
+  var u = safeUrl(base); if(!u) return '';
+  return u + (u.indexOf('?') > -1 ? '&' : '?') + 'answer=' + encodeURIComponent(ans.toLowerCase().replace(/\s+/g,'-'));
+}
+
+/* ---------- email ---------- */
+var SERIF = "'Domine', Georgia, 'Times New Roman', serif";
+var SANS = "'Nunito Sans', Arial, Helvetica, sans-serif";
+
+function button(text, url, bg){
+  var href = safeUrl(url); if(!t(text) || !href) return '';
+  var fg = onColor(bg);
+  return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 4px"><tr><td style="border-radius:8px;background:' + bg + '">' +
+    '<a href="' + esc(href) + '" target="_blank" style="display:inline-block;padding:14px 24px;font-family:' + SANS + ';font-size:16px;font-weight:800;line-height:1.2;color:' + fg + ';text-decoration:none;border-radius:8px">' + esc(text) + ' &rarr;</a></td></tr></table>';
+}
+function eyebrow(text, color){
+  return '<p style="margin:0 0 8px;font-family:' + SANS + ';font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:' + color + '">' + esc(text) + '</p>';
+}
+function block(inner, opts){
+  opts = opts || {};
+  return '<tr><td style="padding:' + (opts.pad || '28px 32px') + ';background:' + (opts.bg || '#FFFFFF') + (opts.border ? ';border-top:1px solid #E6E2D8' : '') + '" class="px">' + inner + '</td></tr>';
+}
+
+function buildEmail(s){
+  var c1 = hex(s.c1,'#142E54'), c2 = hex(s.c2,'#E0A23B');
+  var accentText = lum(c2) > .4 ? '#8A5A0B' : c2; /* readable accent on white */
+  var on1 = onColor(c1);
+  var rows = [];
+  var sub = [t(s.issue) ? 'Issue ' + esc(s.issue) : '', esc(t(s.date))].filter(Boolean).join(' &middot; ');
+
+  rows.push('<tr><td style="background:' + c1 + ';padding:28px 32px 26px" class="px">' +
+    '<p style="margin:0;font-family:' + SERIF + ';font-size:26px;font-weight:700;line-height:1.2;color:' + on1 + '">' + esc(t(s.brand) || 'Newsletter') + '</p>' +
+    (t(s.tagline) ? '<p style="margin:6px 0 0;font-family:' + SANS + ';font-size:14px;font-weight:700;color:' + c2 + '">' + esc(s.tagline) + '</p>' : '') +
+    (sub ? '<p style="margin:14px 0 0;font-family:' + SANS + ';font-size:13px;color:' + (on1 === '#FFFFFF' ? '#C9D3E3' : '#4A5568') + '">' + sub + '</p>' : '') +
+    '</td></tr>');
+
+  if(t(s.headline) || t(s.intro)){
+    var h = '';
+    if(t(s.headline)) h += '<h1 style="margin:0 0 14px;font-family:' + SERIF + ';font-size:30px;font-weight:700;line-height:1.25;color:' + c1 + '" class="h1">' + esc(s.headline) + '</h1>';
+    paras(s.intro).forEach(function(p){ h += '<p style="margin:0 0 12px;font-family:' + SANS + ';font-size:17px;line-height:1.6;color:#2B3442">' + esc(p) + '</p>'; });
+    rows.push(block(h, {pad:'32px 32px 12px'}));
+  }
+
+  if(t(s.fTitle) || t(s.fBody)){
+    var f = '';
+    var img = safeUrl(s.fImg);
+    if(img && /^https?:/i.test(img)) f += '<img src="' + esc(img) + '" alt="' + esc(t(s.fTitle)) + '" width="536" style="display:block;width:100%;max-width:536px;height:auto;border-radius:10px;margin:0 0 18px;border:0">';
+    f += eyebrow('Featured', accentText);
+    if(t(s.fTitle)) f += '<h2 style="margin:0 0 10px;font-family:' + SERIF + ';font-size:22px;font-weight:700;line-height:1.3;color:' + c1 + '">' + esc(s.fTitle) + '</h2>';
+    paras(s.fBody).forEach(function(p){ f += '<p style="margin:0 0 10px;font-family:' + SANS + ';font-size:16px;line-height:1.6;color:#2B3442">' + esc(p) + '</p>'; });
+    f += button(s.fBtn, s.fUrl, c2);
+    rows.push(block(f, {border:true}));
+  }
+
+  if(t(s.tTitle) || t(s.tBody)){
+    var k = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#F6F4EF;border-left:5px solid ' + c2 + ';border-radius:6px;padding:20px 22px">';
+    k += eyebrow('Know your rights', accentText);
+    if(t(s.tTitle)) k += '<p style="margin:0 0 8px;font-family:' + SERIF + ';font-size:19px;font-weight:700;line-height:1.35;color:' + c1 + '">' + esc(s.tTitle) + '</p>';
+    if(t(s.tBody)) k += '<p style="margin:0;font-family:' + SANS + ';font-size:16px;line-height:1.6;color:#2B3442">' + esc(s.tBody) + '</p>';
+    if(t(s.tCite)) k += '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;font-weight:700;color:#5B6576">Source: ' + esc(s.tCite) + '</p>';
+    k += '</td></tr></table>';
+    rows.push(block(k, {pad:'8px 32px 28px'}));
+  }
+
+  var fcs = flipCards(s);
+  if(fcs.length){
+    var FL = flipLabels(s).FL, BL = flipLabels(s).BL;
+    var pill = function(text, bg, fg){ return '<span style="display:inline-block;padding:4px 12px;border-radius:999px;background:' + bg + ';font-family:' + SANS + ';font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:' + fg + '">' + esc(text) + '</span>'; };
+    var fc = eyebrow(FL + ' or ' + BL + '?', accentText);
+    fcs.forEach(function(card, ci){
+      fc += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"' + (ci ? ' style="margin-top:22px"' : '') + '>';
+      fc += '<tr><td style="background:#F6F4EF;border:2px solid ' + c1 + ';border-radius:12px;padding:22px">' + pill(FL, c1, on1) +
+        '<p style="margin:12px 0 0;font-family:' + SERIF + ';font-size:19px;font-weight:700;line-height:1.4;color:' + c1 + '">' + esc(card.f) + '</p></td></tr>';
+      fc += '<tr><td align="center" style="padding:10px 0;font-family:' + SANS + ';font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:' + accentText + '">&#8595; Flip it &#8595;</td></tr>';
+      fc += '<tr><td style="background:' + c1 + ';border-radius:12px;padding:22px">' + pill(BL, c2, onColor(c2)) +
+        '<p style="margin:12px 0 0;font-family:' + SANS + ';font-size:17px;line-height:1.55;color:' + on1 + '">' + esc(card.b) + '</p>' +
+        (t(card.cite) ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;font-weight:700;color:' + (on1 === '#FFFFFF' ? '#C9D3E3' : '#4A5568') + '">Source: ' + esc(card.cite) + '</p>' : '') + '</td></tr>';
+      fc += '</table>';
+    });
+    rows.push(block(fc, {pad:'4px 32px 28px'}));
+  }
+
+  if(t(s.dNum)){
+    var d = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:' + c1 + ';border-radius:10px;padding:24px 24px">';
+    d += eyebrow('Deadline to know', c2);
+    d += '<p style="margin:0;font-family:' + SERIF + ';font-size:52px;font-weight:700;line-height:1;color:' + c2 + '">' + esc(s.dNum) + (t(s.dUnit) ? ' <span style="font-size:22px">' + esc(s.dUnit) + '</span>' : '') + '</p>';
+    if(t(s.dBody)) d += '<p style="margin:12px 0 0;font-family:' + SANS + ';font-size:16px;line-height:1.55;color:' + on1 + '">' + esc(s.dBody) + '</p>';
+    if(t(s.dCite)) d += '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:13px;font-weight:700;color:' + (on1 === '#FFFFFF' ? '#C9D3E3' : '#4A5568') + '">Source: ' + esc(s.dCite) + '</p>';
+    d += '</td></tr></table>';
+    rows.push(block(d, {pad:'0 32px 28px'}));
+  }
+
+  var qs = quick(s);
+  if(qs.length){
+    var q = eyebrow('Quick links', accentText);
+    qs.forEach(function(item, i){
+      var u = safeUrl(item[1]);
+      var label = u ? '<a href="' + esc(u) + '" target="_blank" style="color:' + c1 + ';text-decoration:underline;font-weight:700">' + esc(item[0]) + '</a>' : '<span style="font-weight:700;color:' + c1 + '">' + esc(item[0]) + '</span>';
+      q += '<p style="margin:0;padding:12px 0;' + (i ? 'border-top:1px solid #E6E2D8;' : '') + 'font-family:' + SANS + ';font-size:16px;line-height:1.45">' + label + '</p>';
+    });
+    rows.push(block(q, {border:true}));
+  }
+
+  var hasW = t(s.wTitle), hasE = t(s.eTitle);
+  if(hasW || hasE){
+    function mini(label, title, meta, url, cta){
+      var u = safeUrl(url);
+      return '<td class="stack" valign="top" style="width:50%;padding:0 6px 12px">' +
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border:1px solid #E6E2D8;border-radius:10px;padding:18px">' +
+        eyebrow(label, accentText) +
+        '<p style="margin:0;font-family:' + SERIF + ';font-size:17px;font-weight:700;line-height:1.35;color:' + c1 + '">' + esc(title) + '</p>' +
+        (meta ? '<p style="margin:6px 0 0;font-family:' + SANS + ';font-size:14px;line-height:1.5;color:#5B6576">' + esc(meta) + '</p>' : '') +
+        (u ? '<p style="margin:10px 0 0;font-family:' + SANS + ';font-size:15px;font-weight:800"><a href="' + esc(u) + '" target="_blank" style="color:' + c1 + ';text-decoration:underline">' + cta + ' &rarr;</a></p>' : '') +
+        '</td></tr></table></td>';
+    }
+    var cells = '';
+    if(hasW) cells += mini('Watch or listen', s.wTitle, '', s.wUrl, 'Play now');
+    if(hasE) cells += mini('Next event', s.eTitle, t(s.eWhen), s.eUrl, 'Save your seat');
+    rows.push(block('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 -6px"><tr>' + cells + '</tr></table>', {pad:'24px 26px 16px', border:true}));
+  }
+
+  var ans = pollAnswers(s);
+  if(t(s.pQ) && ans.length){
+    var p = eyebrow('Quick poll · tap to answer', accentText);
+    p += '<p style="margin:0 0 14px;font-family:' + SERIF + ';font-size:19px;font-weight:700;line-height:1.35;color:' + c1 + '">' + esc(s.pQ) + '</p><p style="margin:0">';
+    ans.forEach(function(a){
+      var u = pollLink(s.pUrl, a);
+      p += u ? '<a href="' + esc(u) + '" target="_blank" style="display:inline-block;margin:0 8px 10px 0;padding:11px 20px;border:2px solid ' + c1 + ';border-radius:999px;font-family:' + SANS + ';font-size:15px;font-weight:800;color:' + c1 + ';text-decoration:none">' + esc(a) + '</a>'
+             : '<span style="display:inline-block;margin:0 8px 10px 0;padding:11px 20px;border:2px solid ' + c1 + ';border-radius:999px;font-family:' + SANS + ';font-size:15px;font-weight:800;color:' + c1 + '">' + esc(a) + '</span>';
+    });
+    p += '</p>';
+    rows.push(block(p, {border:true}));
+  }
+
+  if(t(s.cHead) || t(s.cBtn)){
+    var c = '';
+    if(t(s.cHead)) c += '<p style="margin:0 0 8px;font-family:' + SERIF + ';font-size:22px;font-weight:700;line-height:1.3;color:' + on1 + '">' + esc(s.cHead) + '</p>';
+    if(t(s.cBody)) c += '<p style="margin:0;font-family:' + SANS + ';font-size:16px;line-height:1.55;color:' + (on1 === '#FFFFFF' ? '#DCE3EE' : '#2B3442') + '">' + esc(s.cBody) + '</p>';
+    c += button(s.cBtn, s.cUrl, c2);
+    rows.push(block(c, {bg:c1, pad:'30px 32px'}));
+  }
+
+  var soc = socials(s);
+  var foot = '';
+  if(soc.length){
+    foot += '<p style="margin:0 0 14px;font-family:' + SANS + ';font-size:14px;font-weight:800;line-height:2">' +
+      soc.map(function(x){ return '<a href="' + esc(x[1]) + '" target="_blank" style="color:' + c1 + ';text-decoration:none;white-space:nowrap">' + esc(x[0]) + '</a>'; }).join(' <span style="color:#B5AFA2">&nbsp;|&nbsp;</span> ') + '</p>';
+  }
+  if(t(s.why)) foot += '<p style="margin:0 0 8px;font-family:' + SANS + ';font-size:13px;line-height:1.5;color:#5B6576">' + esc(s.why) + '</p>';
+  if(t(s.addr)) foot += '<p style="margin:0 0 8px;font-family:' + SANS + ';font-size:13px;line-height:1.5;color:#5B6576">' + esc(s.addr) + '</p>';
+  var un = t(s.unsub);
+  if(un) foot += '<p style="margin:0;font-family:' + SANS + ';font-size:13px;color:#5B6576"><a href="' + esc(un) + '" style="color:#5B6576;text-decoration:underline">Unsubscribe</a></p>';
+  rows.push('<tr><td style="padding:26px 32px 32px;background:#F6F4EF;text-align:center" class="px">' + foot + '</td></tr>');
+
+  var pre = t(s.preheader);
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="x-apple-disable-message-reformatting"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light">' +
+    '<title>' + esc(t(s.headline) || t(s.brand)) + '</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Domine:wght@700&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">' +
+    '<style>body{margin:0;padding:0;background:#EDEAE3}a{color:' + c1 + '}img{border:0;outline:none}table{border-collapse:collapse}' +
+    '@media only screen and (max-width:620px){.px{padding-left:20px!important;padding-right:20px!important}.h1{font-size:26px!important}.stack{display:block!important;width:100%!important}}</style></head>' +
+    '<body style="margin:0;padding:0;background:#EDEAE3">' +
+    (pre ? '<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">' + esc(pre) + '&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>' : '') +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#EDEAE3"><tr><td align="center" style="padding:24px 10px">' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:12px;overflow:hidden">' +
+    rows.join('') +
+    '</table></td></tr></table></body></html>';
+}
+
+/* ---------- plain text ---------- */
+function buildPlain(s){
+  var L = [];
+  var line = '------------------------------';
+  L.push((t(s.brand) || 'Newsletter').toUpperCase());
+  if(t(s.tagline)) L.push(t(s.tagline));
+  var sub = [t(s.issue) ? 'Issue ' + t(s.issue) : '', t(s.date)].filter(Boolean).join(' · ');
+  if(sub) L.push(sub);
+  L.push('');
+  if(t(s.headline)){ L.push(t(s.headline)); L.push(''); }
+  paras(s.intro).forEach(function(p){ L.push(p); L.push(''); });
+  if(t(s.fTitle) || t(s.fBody)){
+    L.push(line, 'FEATURED: ' + t(s.fTitle));
+    paras(s.fBody).forEach(function(p){ L.push(p); });
+    if(safeUrl(s.fUrl)) L.push((t(s.fBtn) || 'Read more') + ': ' + safeUrl(s.fUrl));
+    L.push('');
+  }
+  if(t(s.tTitle) || t(s.tBody)){
+    L.push(line, 'KNOW YOUR RIGHTS: ' + t(s.tTitle));
+    if(t(s.tBody)) L.push(t(s.tBody));
+    if(t(s.tCite)) L.push('Source: ' + t(s.tCite));
+    L.push('');
+  }
+  var pfl = flipLabels(s);
+  flipCards(s).forEach(function(card, ci){
+    if(ci === 0) L.push(line);
+    L.push(pfl.FL.toUpperCase() + ': ' + t(card.f), pfl.BL.toUpperCase() + ': ' + t(card.b));
+    if(t(card.cite)) L.push('Source: ' + t(card.cite));
+    L.push('');
+  });
+  if(t(s.dNum)){
+    L.push(line, 'DEADLINE TO KNOW: ' + t(s.dNum) + ' ' + t(s.dUnit));
+    if(t(s.dBody)) L.push(t(s.dBody));
+    if(t(s.dCite)) L.push('Source: ' + t(s.dCite));
+    L.push('');
+  }
+  var qs = quick(s);
+  if(qs.length){
+    L.push(line, 'QUICK LINKS');
+    qs.forEach(function(q){ L.push('- ' + t(q[0]) + (safeUrl(q[1]) ? ': ' + safeUrl(q[1]) : '')); });
+    L.push('');
+  }
+  if(t(s.wTitle)){ L.push(line, 'WATCH OR LISTEN: ' + t(s.wTitle)); if(safeUrl(s.wUrl)) L.push(safeUrl(s.wUrl)); L.push(''); }
+  if(t(s.eTitle)){ L.push(line, 'NEXT EVENT: ' + t(s.eTitle)); if(t(s.eWhen)) L.push(t(s.eWhen)); if(safeUrl(s.eUrl)) L.push('Register: ' + safeUrl(s.eUrl)); L.push(''); }
+  var ans = pollAnswers(s);
+  if(t(s.pQ) && ans.length){
+    L.push(line, 'QUICK POLL: ' + t(s.pQ));
+    ans.forEach(function(a){ var u = pollLink(s.pUrl, a); L.push('- ' + a + (u ? ': ' + u : '')); });
+    L.push('');
+  }
+  if(t(s.cHead) || t(s.cBtn)){
+    L.push(line, t(s.cHead));
+    if(t(s.cBody)) L.push(t(s.cBody));
+    if(safeUrl(s.cUrl)) L.push((t(s.cBtn) || 'Learn more') + ': ' + safeUrl(s.cUrl));
+    L.push('');
+  }
+  var soc = socials(s);
+  if(soc.length){ L.push(line); soc.forEach(function(x){ L.push(x[0] + ': ' + x[1]); }); L.push(''); }
+  if(t(s.why)) L.push(t(s.why));
+  if(t(s.addr)) L.push(t(s.addr));
+  if(t(s.unsub)) L.push('Unsubscribe: ' + t(s.unsub));
+  return L.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+
+/* ---------- SMS ---------- */
+var GSM = /^[@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&'()*+,\-./0-9:;<=>?¡A-ZÄÖÑÜ§¿a-zäöñüà^{}\\\[~\]|€]*$/;
+function smsInfo(text){
+  var gsm = GSM.test(text);
+  var len = gsm ? text.replace(/[\^{}\\\[~\]|€]/g,'xx').length : Array.from(text).length;
+  var single = gsm ? 160 : 70, multi = gsm ? 153 : 67;
+  var segs = len === 0 ? 0 : (len <= single ? 1 : Math.ceil(len / multi));
+  return {gsm:gsm, len:len, single:single, segs:segs};
+}
+function plainQuotes(x){ return x.replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...'); }
+function buildSmsShort(s){
+  var from = t(s.smsFrom) || t(s.brand);
+  var url = safeUrl(s.smsUrl) || safeUrl(s.fUrl);
+  var head = t(s.headline);
+  var stop = s.smsStop ? ' Reply STOP to opt out.' : '';
+  var base = (from ? from + ': ' : '');
+  var room = 160 - base.length - (url ? url.length + 1 : 0) - stop.length;
+  if(head.length > room) head = head.slice(0, Math.max(0, room - 3)).replace(/\s+\S*$/,'') + '...';
+  return plainQuotes(base + head + (url ? ' ' + url : '') + stop);
+}
+function buildSmsLong(s){
+  var from = t(s.smsFrom) || t(s.brand);
+  var url = safeUrl(s.smsUrl) || safeUrl(s.fUrl);
+  var L = [];
+  L.push((from ? from + ': ' : '') + t(s.headline));
+  if(t(s.tTitle)) L.push('Know your rights: ' + t(s.tTitle) + (t(s.tCite) ? ' (' + t(s.tCite) + ')' : ''));
+  var sfl = flipLabels(s);
+  flipCards(s).forEach(function(card){ L.push(sfl.FL + ': ' + t(card.f) + '\n' + sfl.BL + ': ' + t(card.b)); });
+  if(t(s.dNum)) L.push('Deadline to know: ' + t(s.dNum) + ' ' + t(s.dUnit) + (t(s.dBody) ? ' ' + t(s.dBody) : ''));
+  if(t(s.eTitle)) L.push('Next event: ' + t(s.eTitle) + (t(s.eWhen) ? ', ' + t(s.eWhen) : '') + (safeUrl(s.eUrl) ? ' ' + safeUrl(s.eUrl) : ''));
+  if(url) L.push('Read more: ' + url);
+  if(s.smsStop) L.push('Reply STOP to opt out.');
+  return L.filter(function(x){ return t(x); }).join('\n\n');
+}
+
+/* ---------- captions ---------- */
+function captions(s){
+  var url = safeUrl(s.fUrl) || safeUrl(s.sWeb);
+  var head = t(s.headline), intro = paras(s.intro)[0] || '';
+  var tip = t(s.tTitle) ? 'Know your rights: ' + t(s.tTitle) + (t(s.tBody) ? '\n' + t(s.tBody) : '') + (t(s.tCite) ? ' (' + t(s.tCite) + ')' : '') : '';
+  var dl = t(s.dNum) ? 'Deadline to know: ' + t(s.dNum) + ' ' + t(s.dUnit) + (t(s.dBody) ? ' ' + t(s.dBody) : '') : '';
+  var cfl = flipLabels(s);
+  var flip = flipCards(s).map(function(card){ return cfl.FL + ': ' + t(card.f) + '\n' + cfl.BL + ': ' + t(card.b); }).join('\n\n');
+  var tags = '#SpecialEducation #IEP #ParentAdvocacy #StudentRights #Delaware';
+  var tagsShort = '#IEP #StudentRights';
+  var q = t(s.pQ) && pollAnswers(s).length ? '\n\n' + t(s.pQ) + ' Tell me in the comments.' : '';
+  return [
+    {name:'Instagram / Facebook', limit:2200, text:[head, intro, flip ? 'Swipe for ' + (t(s.flipFL) || 'myth').toLowerCase() + ' vs. ' + (t(s.flipBL) || 'fact').toLowerCase() + ' \u2192' : '', tip, dl].filter(Boolean).join('\n\n') + q + '\n\nFull issue: link in bio.\n\n' + tags},
+    {name:'TikTok caption', limit:2200, text:[head, dl || tip].filter(Boolean).join('\n\n') + '\n\nFull breakdown: link in bio. Save this for your next school meeting.\n\n' + tags},
+    {name:'Threads', limit:500, text:trimTo([head, dl || intro].filter(Boolean).join('\n\n') + (url ? '\n\n' + url : ''), 500)},
+    {name:'X', limit:280, text:trimTo(head + (url ? ' ' + url : '') + ' ' + tagsShort, 280)},
+    {name:'LinkedIn', limit:3000, text:[head, intro, flip, tip, dl].filter(Boolean).join('\n\n') + (url ? '\n\nRead the full issue: ' + url : '') + '\n\n' + tags}
+  ];
+}
+function trimTo(x, n){ if(Array.from(x).length <= n) return x; return Array.from(x).slice(0, n - 3).join('').replace(/\s+\S*$/,'') + '...'; }
+
+/* ---------- social graphics ---------- */
+var currentSize = 'feed';
+function wrap(ctx, text, maxW){
+  var words = String(text).split(/\s+/).filter(Boolean), lines = [], cur = '';
+  words.forEach(function(w){
+    var test = cur ? cur + ' ' + w : w;
+    if(ctx.measureText(test).width > maxW && cur){ lines.push(cur); cur = w; } else cur = test;
+  });
+  if(cur) lines.push(cur);
+  return lines;
+}
+function fitText(ctx, text, font, start, min, maxW, maxLines){
+  var sz = start, lines;
+  do { ctx.font = font.replace('{s}', sz); lines = wrap(ctx, text, maxW); sz -= 4; } while(lines.length > maxLines && sz >= min);
+  return {lines:lines, size:sz + 4};
+}
+function drawCard(kindArg, s, szArg){
+  var size = szArg || currentSize;
+  var kparts = String(kindArg).split(':'), kind = kparts[0];
+  var card = (kind === 'flipFront' || kind === 'flipBack') ? (flipCards(s)[Number(kparts[1]) || 0] || {f:'', b:'', cite:''}) : null;
+  var W = 1080, H = size === 'feed' ? 1350 : 1920;
+  var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  var x = cv.getContext('2d');
+  var c1 = hex(s.c1,'#142E54'), c2 = hex(s.c2,'#E0A23B'), on1 = onColor(c1);
+  var soft = on1 === '#FFFFFF' ? 'rgba(255,255,255,0.78)' : 'rgba(20,46,84,0.78)';
+  var M = 96, top = size === 'feed' ? 120 : 260, bottomPad = size === 'feed' ? 110 : 280;
+  var inv = kind === 'flipBack';
+  var fg = inv ? c1 : on1;
+  var accentC = inv && lum(c2) > .4 ? '#8A5A0B' : c2;
+  if(inv) soft = 'rgba(20,46,84,0.82)';
+  x.fillStyle = inv ? '#F6F4EF' : c1; x.fillRect(0,0,W,H);
+  x.fillStyle = c2; x.fillRect(0,0,W,18);
+  x.textBaseline = 'alphabetic';
+  x.fillStyle = accentC; x.font = '800 34px "Nunito Sans", Arial, sans-serif';
+  if(x.letterSpacing !== undefined) x.letterSpacing = '4px';
+  var eyebrowText = kind === 'tip' ? 'KNOW YOUR RIGHTS' : kind === 'deadline' ? 'DEADLINE TO KNOW' : kind === 'flipFront' ? ((t(s.flipFL) || 'Myth') + ' or ' + (t(s.flipBL) || 'Fact') + '?').toUpperCase() : kind === 'flipBack' ? (t(s.flipBL) || 'Fact').toUpperCase() : (t(s.brand) || 'NEWSLETTER').toUpperCase();
+  x.fillText(eyebrowText, M, top);
+  if(x.letterSpacing !== undefined) x.letterSpacing = '0px';
+  var y = top + 80, maxW = W - M*2;
+  var serif = '700 {s}px Domine, Georgia, serif', sans = '600 {s}px "Nunito Sans", Arial, sans-serif';
+  var avail = H - y - bottomPad - 140;
+
+  if(kind === 'deadline'){
+    x.fillStyle = c2;
+    var numSize = 300; x.font = serif.replace('{s}', numSize);
+    while(x.measureText(t(s.dNum)).width > maxW && numSize > 120){ numSize -= 10; x.font = serif.replace('{s}', numSize); }
+    y += numSize * 0.78; x.fillText(t(s.dNum), M, y);
+    y += 80; x.font = serif.replace('{s}', 64); x.fillText(t(s.dUnit), M, y);
+    y += 70;
+    var bd = fitText(x, t(s.dBody), sans, 52, 32, maxW, size === 'feed' ? 6 : 9);
+    x.fillStyle = on1; x.font = sans.replace('{s}', bd.size);
+    bd.lines.forEach(function(l){ y += bd.size * 1.35; x.fillText(l, M, y); });
+    if(t(s.dCite)){ y += 70; x.fillStyle = soft; x.font = '700 30px "Nunito Sans", Arial, sans-serif'; x.fillText('Source: ' + t(s.dCite), M, y); }
+  } else if(kind === 'tip'){
+    var tt = fitText(x, t(s.tTitle), serif, 76, 44, maxW, size === 'feed' ? 5 : 7);
+    x.fillStyle = on1; x.font = serif.replace('{s}', tt.size);
+    tt.lines.forEach(function(l){ y += tt.size * 1.18; x.fillText(l, M, y); });
+    y += 40; x.fillStyle = c2; x.fillRect(M, y, 120, 8); y += 30;
+    var tb = fitText(x, t(s.tBody), sans, 46, 30, maxW, size === 'feed' ? 7 : 11);
+    x.fillStyle = soft; x.font = sans.replace('{s}', tb.size);
+    tb.lines.forEach(function(l){ y += tb.size * 1.4; x.fillText(l, M, y); });
+    if(t(s.tCite)){ y += 64; x.fillStyle = c2; x.font = '800 30px "Nunito Sans", Arial, sans-serif'; x.fillText('Source: ' + t(s.tCite), M, y); }
+  } else if(kind === 'flipFront' || kind === 'flipBack'){
+    var front = kind === 'flipFront';
+    var lab = front ? (t(s.flipFL) || 'Myth') : (t(s.flipBL) || 'Fact');
+    x.font = '800 40px "Nunito Sans", Arial, sans-serif';
+    var pw = x.measureText(lab.toUpperCase()).width + 64;
+    x.fillStyle = front ? c2 : c1;
+    if(x.roundRect){ x.beginPath(); x.roundRect(M, y, pw, 76, 38); x.fill(); } else x.fillRect(M, y, pw, 76);
+    x.fillStyle = front ? onColor(c2) : onColor(c1);
+    x.fillText(lab.toUpperCase(), M + 32, y + 52);
+    y += 110;
+    var body = front ? t(card.f) : t(card.b);
+    var fb = front ? fitText(x, body, serif, 80, 44, maxW, size === 'feed' ? 7 : 10) : fitText(x, body, sans, 54, 32, maxW, size === 'feed' ? 10 : 14);
+    x.fillStyle = fg; x.font = (front ? serif : sans).replace('{s}', fb.size);
+    fb.lines.forEach(function(l){ y += fb.size * (front ? 1.2 : 1.38); x.fillText(l, M, y); });
+    if(!front && t(card.cite)){ y += 64; x.fillStyle = accentC; x.font = '800 30px "Nunito Sans", Arial, sans-serif'; x.fillText('Source: ' + t(card.cite), M, y); }
+  } else {
+    var hh = fitText(x, t(s.headline), serif, 92, 50, maxW, size === 'feed' ? 6 : 8);
+    x.fillStyle = on1; x.font = serif.replace('{s}', hh.size);
+    hh.lines.forEach(function(l){ y += hh.size * 1.16; x.fillText(l, M, y); });
+    var intro = paras(s.intro)[0] || '';
+    if(intro){
+      y += 50;
+      var ii = fitText(x, intro, sans, 44, 30, maxW, size === 'feed' ? 4 : 7);
+      x.fillStyle = soft; x.font = sans.replace('{s}', ii.size);
+      ii.lines.forEach(function(l){ if(y + ii.size*1.4 < H - bottomPad - 120){ y += ii.size * 1.4; x.fillText(l, M, y); } });
+    }
+  }
+  /* footer band */
+  var fy = H - bottomPad;
+  x.fillStyle = fg === '#FFFFFF' ? 'rgba(255,255,255,0.18)' : 'rgba(20,46,84,0.18)'; x.fillRect(M, fy - 70, maxW, 2);
+  x.fillStyle = fg; x.font = '800 34px "Nunito Sans", Arial, sans-serif';
+  x.fillText(t(s.handle) || t(s.brand), M, fy);
+  x.fillStyle = accentC; x.font = '800 30px "Nunito Sans", Arial, sans-serif';
+  var cta = kind === 'headline' ? 'Full issue: link in bio' : kind === 'flipFront' ? 'Swipe for the answer \u2192' : 'Save this \u2022 Share it';
+  x.textAlign = 'right'; x.fillText(cta, W - M, fy); x.textAlign = 'left';
+  return cv;
+}
+
+var downloads = null;
+var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([
+  document.fonts.load('700 80px Domine'), document.fonts.load('600 40px "Nunito Sans"'), document.fonts.load('800 30px "Nunito Sans"')
+]).catch(function(){}) : Promise.resolve();
+
+function renderCards(s){
+  var host = document.getElementById('cards');
+  var ready = cardKinds(s);
+  fontsReady.then(function(){
+    host.innerHTML = '';
+    if(!ready.length){ host.innerHTML = '<p class="panel-note">Add a headline, flip card, rights tip or deadline to generate graphics.</p>'; return; }
+    ready.forEach(function(k){
+      var cv = drawCard(k[0], s);
+      var wrapEl = document.createElement('div'); wrapEl.className = 'card-out';
+      var img = document.createElement('img'); img.src = cv.toDataURL('image/png'); img.alt = k[1] + ' graphic, ' + (currentSize === 'feed' ? '4:5' : '9:16');
+      var cap = document.createElement('span'); cap.className = 'cap'; cap.textContent = k[1];
+      wrapEl.appendChild(img); wrapEl.appendChild(cap);
+      if(downloads){
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-line'; b.textContent = 'Save PNG';
+        b.addEventListener('click', function(){
+          cv.toBlob(function(blob){
+            var name = slug(t(s.brand) || 'newsletter') + (t(s.issue) ? '-issue-' + slug(s.issue) : '') + '-' + k[0].replace(':', '-') + '-' + currentSize + '.png';
+            downloads.save({filename:name, data:blob}).then(function(){ toast('Saved ' + name); }).catch(function(e){ if(e && e.code === 'declined') return; toast('Could not save. Right-click the image instead.'); });
+          }, 'image/png');
+        });
+        wrapEl.appendChild(b);
+      }
+      host.appendChild(wrapEl);
+    });
+  });
+}
+function cardKinds(s){
+  var out = [];
+  if(t(s.headline)) out.push(['headline','Headline']);
+  var fcs = flipCards(s), many = fcs.length > 1;
+  fcs.forEach(function(_, i){
+    var n = many ? ' ' + (i + 1) : '';
+    out.push(['flipFront:' + i, 'Flip card' + n + ': front'], ['flipBack:' + i, 'Flip card' + n + ': back']);
+  });
+  if(t(s.tTitle)) out.push(['tip','Know your rights']);
+  if(t(s.dNum)) out.push(['deadline','Deadline to know']);
+  return out;
+}
+function slug(x){ return String(x).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'issue'; }
+
+function renderCaptions(s){
+  var host = document.getElementById('captions');
+  host.innerHTML = '';
+  captions(s).forEach(function(c, i){
+    var n = Array.from(c.text).length;
+    var box = document.createElement('div'); box.className = 'capt';
+    box.innerHTML = '<div class="capt-head"><strong></strong><span class="count' + (n > c.limit ? ' over' : '') + '"></span></div><textarea readonly></textarea>';
+    box.querySelector('strong').textContent = c.name;
+    box.querySelector('.count').textContent = n + ' / ' + c.limit;
+    var ta = box.querySelector('textarea'); ta.value = c.text; ta.id = 'cap' + i; ta.setAttribute('aria-label', c.name + ' caption');
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-line'; b.textContent = 'Copy caption';
+    b.addEventListener('click', function(){ copyText(ta.value, ta); });
+    var act = document.createElement('div'); act.className = 'actions'; act.appendChild(b);
+    box.appendChild(act);
+    host.appendChild(box);
+  });
+}
+
+/* ---------- checklist ---------- */
+function renderChecklist(s){
+  var items = [
+    [t(s.headline), 'Headline written (also use it as your subject line)'],
+    [t(s.preheader), 'Preview text added'],
+    [t(s.addr) && t(s.addr).indexOf('[') !== 0, 'Mailing address filled in'],
+    [t(s.unsub), 'Unsubscribe tag matches your email tool'],
+    [!/\[[^\]]+\]/.test(JSON.stringify(s)), 'No [bracketed placeholders] left'],
+    [quick(s).every(function(q){ return safeUrl(q[1]); }) && (!t(s.fBtn) || !t(s.fTitle) || safeUrl(s.fUrl)), 'Every link has an address']
+  ];
+  document.getElementById('checklist').innerHTML = items.map(function(i){
+    return '<li><span class="' + (i[0] ? 'ok">Done' : 'no">To do') + '</span> — ' + esc(i[1]) + '</li>';
+  }).join('');
+}
+
+/* ---------- SMS render ---------- */
+function renderSms(s, rebuild){
+  var a = document.getElementById('smsShort'), b = document.getElementById('smsLong');
+  if(rebuild || !smsTouched){ a.value = buildSmsShort(s); b.value = buildSmsLong(s); }
+  updateSmsMeta(s);
+}
+function updateSmsMeta(s){
+  var a = document.getElementById('smsShort').value, b = document.getElementById('smsLong').value;
+  var ia = smsInfo(a), ib = smsInfo(b);
+  var ca = document.getElementById('smsCount');
+  ca.textContent = ia.len + ' characters · ' + ia.segs + (ia.segs === 1 ? ' message' : ' messages') + (ia.gsm ? '' : ' · has special characters');
+  ca.classList.toggle('over', ia.segs > 1);
+  document.getElementById('mmsCount').textContent = ib.len + ' characters';
+  document.getElementById('smsBubble').textContent = a || 'Your text will appear here.';
+  document.getElementById('smsPrevFrom').textContent = t(s.smsFrom) || t(s.brand) || 'Text message';
+  document.getElementById('smsSegs').textContent = ia.segs > 1 ? 'Sends as ' + ia.segs + ' parts' : 'Sends as 1 text';
+}
+
+
+/* ---------- website flip cards ---------- */
+function hashStr(x){ var h = 5381; for(var i = 0; i < x.length; i++){ h = ((h << 5) + h + x.charCodeAt(i)) | 0; } return (h >>> 0).toString(36); }
+/* Pure HTML + CSS: a hidden checkbox per card holds the flipped state, so it flips back and forth with no JavaScript. */
+function buildFlipEmbed(s){
+  var fcs = flipCards(s);
+  if(!fcs.length) return '';
+  var c1 = hex(s.c1,'#142E54'), c2 = hex(s.c2,'#E0A23B'), on1 = onColor(c1), on2 = onColor(c2);
+  var L = flipLabels(s);
+  var uid = 'dhe' + hashStr(JSON.stringify(fcs) + L.FL + L.BL + c1 + c2);
+  var css = '<style>\n' +
+    '.' + uid + '{max-width:960px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;font-family:"Nunito Sans",Arial,sans-serif;box-sizing:border-box}\n' +
+    '.' + uid + ' .card{position:relative;perspective:1400px;display:flex}\n' +
+    '.' + uid + ' .tg{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;margin:0;pointer-events:none}\n' +
+    '.' + uid + ' label{display:block;flex:1;cursor:pointer;border-radius:16px;-webkit-tap-highlight-color:transparent}\n' +
+    '.' + uid + ' .tg:focus-visible + label{outline:3px solid ' + c2 + ';outline-offset:4px}\n' +
+    '.' + uid + ' .in{display:grid;height:100%;transition:transform .6s ease;transform-style:preserve-3d}\n' +
+    '.' + uid + ' .tg:checked + label .in{transform:rotateY(180deg)}\n' +
+    '.' + uid + ' .side{grid-area:1/1;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:16px;padding:28px;min-height:280px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box}\n' +
+    '.' + uid + ' .front{background:#F6F4EF;color:' + c1 + ';border:2px solid ' + c1 + '}\n' +
+    '.' + uid + ' .back{background:' + c1 + ';color:' + on1 + ';transform:rotateY(180deg)}\n' +
+    '.' + uid + ' .lab{align-self:flex-start;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px}\n' +
+    '.' + uid + ' .front .lab{background:' + c1 + ';color:' + on1 + '}\n' +
+    '.' + uid + ' .back .lab{background:' + c2 + ';color:' + on2 + '}\n' +
+    '.' + uid + ' .q{font-family:Domine,Georgia,serif;font-size:22px;font-weight:700;line-height:1.35}\n' +
+    '.' + uid + ' .a{font-size:17px;line-height:1.55}\n' +
+    '.' + uid + ' .src{font-size:13px;font-weight:700;opacity:.85}\n' +
+    '.' + uid + ' .hint{margin-top:auto;font-size:14px;font-weight:800;opacity:.85}\n' +
+    '@media (prefers-reduced-motion:reduce){.' + uid + ' .in{transition:none}}\n' +
+    '</style>\n';
+  var body = fcs.map(function(card, i){
+    var id = uid + '-' + (i + 1);
+    return '<div class="card">\n' +
+      '<input type="checkbox" class="tg" id="' + id + '" aria-label="Flip card ' + (i + 1) + ': show the ' + esc(L.BL.toLowerCase()) + '">\n' +
+      '<label for="' + id + '"><span class="in">\n' +
+      '<span class="side front"><span class="lab">' + esc(L.FL) + '</span><span class="q">' + esc(card.f) + '</span><span class="hint">Tap to see the ' + esc(L.BL.toLowerCase()) + ' &#8594;</span></span>\n' +
+      '<span class="side back"><span class="lab">' + esc(L.BL) + '</span><span class="a">' + esc(card.b) + '</span>' + (t(card.cite) ? '<span class="src">Source: ' + esc(card.cite) + '</span>' : '') + '<span class="hint">&#8592; Tap to flip back</span></span>\n' +
+      '</span></label>\n</div>';
+  }).join('\n');
+  return '<div class="' + uid + '">\n' + css + body + '\n</div>';
+}
+/* A ready-to-paste React component for the Bolt site */
+function buildFlipReact(s){
+  var fcs = flipCards(s);
+  if(!fcs.length) return '';
+  var c1 = hex(s.c1,'#142E54'), c2 = hex(s.c2,'#E0A23B'), on1 = onColor(c1), on2 = onColor(c2);
+  var L = flipLabels(s);
+  var data = fcs.map(function(c){ return '  { front: ' + JSON.stringify(t(c.f)) + ', back: ' + JSON.stringify(t(c.b)) + ', source: ' + JSON.stringify(t(c.cite)) + ' },'; }).join('\n');
+  return [
+    '// Newsletter flip cards, made in Newsletter Studio.',
+    '// Each card flips back and forth every time it is clicked or tapped.',
+    '// To change the cards, edit them in Newsletter Studio and paste the new code over this file.',
+    'import { useState } from "react";',
+    'import type { CSSProperties } from "react";',
+    '',
+    'const FRONT_LABEL = ' + JSON.stringify(L.FL) + ';',
+    'const BACK_LABEL = ' + JSON.stringify(L.BL) + ';',
+    'const PRIMARY = "' + c1 + '";',
+    'const ACCENT = "' + c2 + '";',
+    'const ON_PRIMARY = "' + on1 + '";',
+    'const ON_ACCENT = "' + on2 + '";',
+    '',
+    'const cards = [',
+    data,
+    '];',
+    '',
+    'const face: CSSProperties = {',
+    '  gridArea: "1 / 1",',
+    '  backfaceVisibility: "hidden",',
+    '  WebkitBackfaceVisibility: "hidden",',
+    '  borderRadius: 16,',
+    '  padding: 28,',
+    '  minHeight: 280,',
+    '  display: "flex",',
+    '  flexDirection: "column",',
+    '  gap: 14,',
+    '  boxSizing: "border-box",',
+    '  textAlign: "left",',
+    '};',
+    'const pill: CSSProperties = {',
+    '  alignSelf: "flex-start",',
+    '  fontSize: 13,',
+    '  fontWeight: 800,',
+    '  letterSpacing: "0.12em",',
+    '  textTransform: "uppercase",',
+    '  padding: "5px 12px",',
+    '  borderRadius: 999,',
+    '};',
+    '',
+    'function Card({ front, back, source, index }: { front: string; back: string; source: string; index: number }) {',
+    '  const [flipped, setFlipped] = useState(false);',
+    '  return (',
+    '    <button',
+    '      type="button"',
+    '      onClick={() => setFlipped((f) => !f)}',
+    '      aria-pressed={flipped}',
+    '      aria-label={`Flip card ${index + 1}: ${flipped ? "show the front" : "show the " + BACK_LABEL.toLowerCase()}`}',
+    '      style={{ display: "block", width: "100%", padding: 0, border: 0, background: "none", cursor: "pointer", font: "inherit", borderRadius: 16, perspective: 1400, height: "100%" }}',
+    '    >',
+    '      <span',
+    '        style={{',
+    '          display: "grid",',
+    '          height: "100%",',
+    '          transition: "transform 0.6s ease",',
+    '          transformStyle: "preserve-3d",',
+    '          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",',
+    '        }}',
+    '      >',
+    '        <span style={{ ...face, background: "#F6F4EF", color: PRIMARY, border: `2px solid ${PRIMARY}` }}>',
+    '          <span style={{ ...pill, background: PRIMARY, color: ON_PRIMARY }}>{FRONT_LABEL}</span>',
+    '          <span style={{ fontFamily: "Domine, Georgia, serif", fontSize: 22, fontWeight: 700, lineHeight: 1.35 }}>{front}</span>',
+    '          <span style={{ marginTop: "auto", fontSize: 14, fontWeight: 800, opacity: 0.85 }}>Tap to see the {BACK_LABEL.toLowerCase()} &rarr;</span>',
+    '        </span>',
+    '        <span style={{ ...face, background: PRIMARY, color: ON_PRIMARY, transform: "rotateY(180deg)" }}>',
+    '          <span style={{ ...pill, background: ACCENT, color: ON_ACCENT }}>{BACK_LABEL}</span>',
+    '          <span style={{ fontSize: 17, lineHeight: 1.55 }}>{back}</span>',
+    '          {source && <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.85 }}>Source: {source}</span>}',
+    '          <span style={{ marginTop: "auto", fontSize: 14, fontWeight: 800, opacity: 0.85 }}>&larr; Tap to flip back</span>',
+    '        </span>',
+    '      </span>',
+    '    </button>',
+    '  );',
+    '}',
+    '',
+    'export default function NewsletterFlipCards() {',
+    '  return (',
+    '    <section',
+    '      style={{',
+    '        maxWidth: 960,',
+    '        margin: "24px auto",',
+    '        padding: "0 16px",',
+    '        display: "grid",',
+    '        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",',
+    '        gap: 20,',
+    '        fontFamily: \'"Nunito Sans", Arial, sans-serif\',',
+    '        boxSizing: "border-box",',
+    '      }}',
+    '    >',
+    '      {cards.map((c, i) => (',
+    '        <Card key={i} index={i} front={c.front} back={c.back} source={c.source} />',
+    '      ))}',
+    '    </section>',
+    '  );',
+    '}',
+    ''
+  ].join('\n');
+}
+function mountFlip(host, s){
+  var code = buildFlipEmbed(s);
+  if(!code){ host.innerHTML = '<p class="pv-empty">Fill in a flip card’s front and back to build it.</p>'; return; }
+  host.innerHTML = code;
+}
+function renderWeb(s){
+  mountFlip(document.getElementById('webLive'), s);
+  document.getElementById('webCode').textContent = buildFlipEmbed(s) || 'Fill in the flip cards section to get the code.';
+  document.getElementById('reactCode').textContent = buildFlipReact(s) || 'Fill in the flip cards section to get the code.';
+}
+
+/* ---------- preview ---------- */
+var pv = 'inbox', pvIndex = 0, pvMore = false, imgCache = {};
+function cardImages(s, sz){
+  var kinds = cardKinds(s);
+  return fontsReady.then(function(){
+    return kinds.map(function(k){
+      var key = sz + '|' + k[0] + '|' + JSON.stringify(s);
+      if(!imgCache[key]) imgCache[key] = drawCard(k[0], s, sz).toDataURL('image/png');
+      return {kind:k[0], label:k[1], url:imgCache[key]};
+    });
+  });
+}
+function initials(s){ return (t(s.brand) || 'N').split(/\s+/).map(function(w){ return w.charAt(0); }).join('').slice(0,2).toUpperCase(); }
+function avatar(s, cls){ var c1 = hex(s.c1,'#142E54'); return '<span class="pv-av' + (cls ? ' ' + cls : '') + '" style="background:' + c1 + ';color:' + onColor(c1) + '" aria-hidden="true">' + esc(initials(s)) + '</span>'; }
+function handleOf(s){ return (t(s.handle) || t(s.brand) || 'yourname').replace(/^@/,'').replace(/\s+/g,'').toLowerCase(); }
+function capText(s, name){ var c = captions(s).filter(function(x){ return x.name === name; })[0]; return c ? c.text : ''; }
+function clip(text, n){
+  var arr = Array.from(text || '');
+  if(pvMore || arr.length <= n) return esc(text);
+  return esc(arr.slice(0, n).join('').replace(/\s+\S*$/,'')) + '… <button type="button" class="pv-more" data-more="1">more</button>';
+}
+function carousel(imgs, ratio){
+  if(!imgs.length) return '<div class="pv-empty" style="background:#F3F4F6">Add a headline, flip card, tip or deadline to see graphics.</div>';
+  var i = Math.min(pvIndex, imgs.length - 1);
+  var h = '<div class="pv-car" style="aspect-ratio:' + ratio + '"><img src="' + imgs[i].url + '" alt="' + esc(imgs[i].label) + ' graphic">';
+  if(imgs.length > 1){
+    h += '<span class="pv-count">' + (i + 1) + '/' + imgs.length + '</span>';
+    if(i > 0) h += '<button type="button" class="pv-nav prev" data-car="-1" aria-label="Previous slide">&#8249;</button>';
+    if(i < imgs.length - 1) h += '<button type="button" class="pv-nav next" data-car="1" aria-label="Next slide">&#8250;</button>';
+  }
+  h += '</div>';
+  if(imgs.length > 1) h += '<div class="pv-dots">' + imgs.map(function(_, j){ return '<span class="' + (j === i ? 'on' : '') + '"></span>'; }).join('') + '</div>';
+  return h;
+}
+var ICONS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg>' +
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12z"/></svg>' +
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3 11 14M22 3l-7 19-4-8-8-4z"/></svg>';
+function statusBar(){ return '<div class="pv-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>'; }
+
+function renderPreview(s){
+  var stage = document.getElementById('pvStage');
+  var brand = t(s.brand) || 'Newsletter', handle = handleOf(s);
+  if(pv === 'inbox'){
+    var pre = t(s.preheader) || paras(s.intro)[0] || '';
+    var row = function(cls, who, subj, prev, time){ return '<div class="pv-mail' + cls + '">' + who + '<div class="pv-mail-body"><div class="pv-mail-who"><b>' + subj[0] + '</b><span>' + time + '</span></div><div class="pv-mail-subj">' + subj[1] + '</div><div class="pv-mail-pre">' + prev + '</div></div></div>'; };
+    var skel = '<div class="pv-mail"><span class="pv-av" style="background:#E5E7EB"></span><div class="pv-mail-body"><div class="pv-skel" style="width:40%"></div><div class="pv-skel" style="width:85%"></div><div class="pv-skel" style="width:70%"></div></div></div>';
+    stage.innerHTML = '<div class="pv-pair">' +
+      '<div><p class="pv-label">In the inbox</p><div class="phone">' + statusBar() + '<div class="pv-apptitle">Inbox</div>' +
+      row(' new', avatar(s), [esc(brand), esc(t(s.headline) || '(no subject)')], esc(pre), '9:41 AM') + skel + skel + skel + '</div></div>' +
+      '<div><p class="pv-label">Opened on a phone</p><div class="phone"><iframe id="pvMail" title="Email opened on a phone" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div></div>' +
+      '</div>';
+    document.getElementById('pvMail').srcdoc = lastHtml;
+    return;
+  }
+  if(pv === 'text'){
+    var msg = document.getElementById('smsShort').value;
+    var info = smsInfo(msg);
+    stage.innerHTML = '<div class="phone">' + statusBar() + '<div class="pv-sms"><div class="from">' + avatar(s, 'sm') + '<br>' + esc(t(s.smsFrom) || brand) + '</div>' +
+      '<div class="bub">' + esc(msg || 'Your text will appear here.') + '</div><div class="meta">' + (info.segs > 1 ? 'Sends as ' + info.segs + ' parts' : 'Sends as 1 text') + '</div></div></div>';
+    return;
+  }
+  if(pv === 'web'){
+    stage.innerHTML = '<div class="pv-browser"><div class="bar"><i></i><i></i><i></i><span class="url">' + esc(safeUrl(s.sWeb) || 'yourwebsite.com') + '</span></div><div class="page" id="pvWeb"></div></div>';
+    mountFlip(document.getElementById('pvWeb'), s);
+    return;
+  }
+  var sz = pv === 'story' ? 'story' : 'feed';
+  stage.innerHTML = '<p class="pv-empty">Drawing graphics…</p>';
+  var want = pv;
+  cardImages(s, sz).then(function(imgs){
+    if(want !== pv) return;
+    var html = '';
+    if(pv === 'instagram'){
+      html = '<div class="phone">' + statusBar() + '<div class="pv-ig-top"><span>Instagram</span></div>' +
+        '<div class="pv-head">' + avatar(s, 'sm') + '<b>' + esc(handle) + '</b></div>' + carousel(imgs, '4/5') +
+        '<div class="pv-icons">' + ICONS + '</div>' +
+        '<div class="pv-cap"><b>' + esc(handle) + '</b> ' + clip(capText(s, 'Instagram / Facebook'), 125) + '</div></div>';
+    } else if(pv === 'facebook'){
+      html = '<div class="pv-feed"><div class="pv-head">' + avatar(s) + '<div><b>' + esc(brand) + '</b><small>Just now</small></div></div>' +
+        '<div class="pv-text">' + clip(capText(s, 'Instagram / Facebook'), 240) + '</div>' + carousel(imgs, '4/5') +
+        '<div class="pv-bar"><span>Like</span><span>Comment</span><span>Share</span></div></div>';
+    } else if(pv === 'linkedin'){
+      html = '<div class="pv-feed"><div class="pv-head">' + avatar(s) + '<div><b>' + esc(brand) + '</b><small>Just now</small></div></div>' +
+        '<div class="pv-text">' + clip(capText(s, 'LinkedIn'), 210) + '</div>' + carousel(imgs, '4/5') +
+        '<div class="pv-bar"><span>Like</span><span>Comment</span><span>Repost</span><span>Send</span></div></div>';
+    } else if(pv === 'threads' || pv === 'x'){
+      var name = pv === 'x' ? 'X' : 'Threads', limit = pv === 'x' ? 280 : 500;
+      var txt = capText(s, name), n = Array.from(txt).length;
+      var first = imgs[0];
+      html = '<div class="pv-feed"><div class="pv-thread">' + avatar(s) + '<div class="pv-body"><div class="who"><b>' + esc(brand) + '</b> <span>@' + esc(handle) + ' · now</span></div>' +
+        '<div class="txt">' + esc(txt) + '</div>' + (first ? '<img src="' + first.url + '" alt="' + esc(first.label) + ' graphic">' : '') +
+        '<div class="acts"><span>Reply</span><span>Repost</span><span>Like</span><span>Share</span></div></div></div>' +
+        '<div class="pv-limit' + (n > limit ? ' over' : '') + '">' + n + ' of ' + limit + ' characters</div></div>';
+    } else if(pv === 'story'){
+      if(!imgs.length){ html = '<p class="pv-empty">Add a headline, flip card, tip or deadline to see story slides.</p>'; }
+      else {
+        var i = Math.min(pvIndex, imgs.length - 1);
+        html = '<div><p class="pv-label">Tap the sides to move between slides</p><div class="pv-story"><img src="' + imgs[i].url + '" alt="' + esc(imgs[i].label) + ' story graphic">' +
+          '<div class="pv-bars">' + imgs.map(function(_, j){ return '<span class="' + (j <= i ? 'on' : '') + '"></span>'; }).join('') + '</div>' +
+          '<div class="who">' + avatar(s, 'sm') + esc(handle) + '</div>' +
+          '<div class="tt"><b>@' + esc(handle) + '</b>\n' + esc(Array.from(capText(s, 'TikTok caption')).slice(0, 110).join('')) + '…</div>' +
+          '<button type="button" class="pv-tap l" data-car="-1" aria-label="Previous slide"></button><button type="button" class="pv-tap r" data-car="1" aria-label="Next slide"></button></div></div>';
+      }
+    }
+    stage.innerHTML = html;
+  });
+}
+var pvTimer = null;
+document.getElementById('pvStage').addEventListener('click', function(e){
+  var car = e.target.closest('[data-car]');
+  if(car){
+    var n = cardKinds(state).length;
+    pvIndex = Math.max(0, Math.min(n - 1, pvIndex + Number(car.dataset.car)));
+    renderPreview(state); return;
+  }
+  if(e.target.closest('[data-more]')){ pvMore = true; renderPreview(state); }
+});
+document.querySelectorAll('[data-pv]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('[data-pv]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+    pv = b.dataset.pv; pvIndex = 0; pvMore = false; renderPreview(state);
+    try{ localStorage.setItem(KEY + '-pv', pv); }catch(e){}
+  });
+});
+
+/* ---------- render all ---------- */
+var lastHtml = '';
+var renderTimer = null;
+function render(){
+  readForm();
+  var s = state;
+  lastHtml = buildEmail(s);
+  document.getElementById('emailFrame').srcdoc = lastHtml;
+  document.getElementById('plainOut').textContent = buildPlain(s);
+  renderChecklist(s);
+  renderSms(s, false);
+  if(!document.getElementById('p-social').hidden){ renderCards(s); renderCaptions(s); }
+  if(!document.getElementById('p-preview').hidden){ clearTimeout(pvTimer); pvTimer = setTimeout(function(){ renderPreview(state); }, 300); }
+  if(!document.getElementById('p-web').hidden) renderWeb(s);
+  if(Object.keys(imgCache).length > 40) imgCache = {};
+  save();
+}
+function scheduleRender(){ clearTimeout(renderTimer); renderTimer = setTimeout(render, 250); }
+
+/* ---------- copy ---------- */
+function toast(msg){
+  var el = document.getElementById('toast'); el.textContent = msg; el.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(function(){ el.hidden = true; }, 2200);
+}
+function copyText(text, selectEl){
+  var done = function(){ toast('Copied'); };
+  var fail = function(){
+    if(selectEl){
+      if(selectEl.select){ selectEl.focus(); selectEl.select(); }
+      else { var r = document.createRange(); r.selectNodeContents(selectEl); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+    }
+    toast('Selected. Press Ctrl+C or Cmd+C to copy.');
+  };
+  try{ navigator.clipboard.writeText(text).then(done, fail); }catch(e){ fail(); }
+}
+function copyRich(){
+  var html = lastHtml;
+  var plain = buildPlain(state);
+  try{
+    if(window.ClipboardItem && navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([html], {type:'text/html'}), 'text/plain': new Blob([plain], {type:'text/plain'})})])
+        .then(function(){ toast('Copied. Paste into your email editor.'); }, fallbackRich);
+      return;
+    }
+  }catch(e){}
+  fallbackRich();
+}
+function fallbackRich(){
+  try{
+    var doc = document.getElementById('emailFrame').contentDocument;
+    var r = doc.createRange(); r.selectNodeContents(doc.body);
+    var sel = doc.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    toast('Email selected in the preview. Press Ctrl+C or Cmd+C.');
+  }catch(e){ toast('Select the email in the preview and copy it.'); }
+}
+
+/* ---------- events ---------- */
+form.addEventListener('input', function(e){ if(e.target.dataset.k && e.target.id.indexOf('sms') === 0) smsTouched = false; scheduleRender(); });
+form.addEventListener('change', scheduleRender);
+form.addEventListener('submit', function(e){ e.preventDefault(); });
+document.getElementById('smsShort').addEventListener('input', function(){ smsTouched = true; updateSmsMeta(state); if(pv === 'text' && !document.getElementById('p-preview').hidden) renderPreview(state); });
+document.getElementById('smsLong').addEventListener('input', function(){ smsTouched = true; updateSmsMeta(state); });
+document.getElementById('smsReset').addEventListener('click', function(){ smsTouched = false; renderSms(state, true); toast('Rebuilt from issue'); });
+
+document.querySelectorAll('[data-copy]').forEach(function(b){
+  b.addEventListener('click', function(){ var el = document.getElementById(b.dataset.copy); copyText(el.value, el); });
+});
+document.querySelectorAll('[data-copy-pre]').forEach(function(b){
+  b.addEventListener('click', function(){ var el = document.getElementById(b.dataset.copyPre); copyText(el.textContent, el); });
+});
+document.getElementById('copyHtml').addEventListener('click', function(){ copyText(lastHtml, null); });
+document.getElementById('copyRich').addEventListener('click', copyRich);
+document.getElementById('dlHtml').addEventListener('click', function(){
+  if(!downloads) return;
+  var name = slug(t(state.brand) || 'newsletter') + (t(state.issue) ? '-issue-' + slug(state.issue) : '') + '.html';
+  downloads.save({filename:name, data:lastHtml}).then(function(){ toast('Saved ' + name); }).catch(function(e){ if(e && e.code !== 'declined') toast('Could not save. Use Copy HTML code instead.'); });
+});
+
+function setPressed(a, b){ a.setAttribute('aria-pressed','true'); b.setAttribute('aria-pressed','false'); }
+var wDesk = document.getElementById('wDesk'), wMob = document.getElementById('wMob'), fw = document.getElementById('frameWrap');
+wDesk.addEventListener('click', function(){ setPressed(wDesk, wMob); fw.classList.remove('mobile'); });
+wMob.addEventListener('click', function(){ setPressed(wMob, wDesk); fw.classList.add('mobile'); });
+var szFeed = document.getElementById('szFeed'), szStory = document.getElementById('szStory');
+szFeed.addEventListener('click', function(){ setPressed(szFeed, szStory); currentSize = 'feed'; renderCards(state); });
+szStory.addEventListener('click', function(){ setPressed(szStory, szFeed); currentSize = 'story'; renderCards(state); });
+
+var tabs = Array.prototype.slice.call(document.querySelectorAll('[role=tab]'));
+function selectTab(tab){
+  tabs.forEach(function(x){
+    var on = x === tab; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1;
+    document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+  });
+  if(tab.id === 'tab-social'){ renderCards(state); renderCaptions(state); }
+  if(tab.id === 'tab-preview') renderPreview(state);
+  if(tab.id === 'tab-web') renderWeb(state);
+  try{ localStorage.setItem(KEY + '-tab', tab.id); }catch(e){}
+}
+tabs.forEach(function(tab, i){
+  tab.addEventListener('click', function(){ selectTab(tab); });
+  tab.addEventListener('keydown', function(e){
+    var n = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if(n){ var nx = tabs[(i + n + tabs.length) % tabs.length]; selectTab(nx); nx.focus(); e.preventDefault(); }
+  });
+});
+
+var confirmArmed = null;
+function armed(btn, label, action){
+  if(confirmArmed === btn){ confirmArmed = null; btn.textContent = label; action(); return; }
+  confirmArmed = btn; btn.textContent = 'Click again to confirm';
+  setTimeout(function(){ if(confirmArmed === btn){ confirmArmed = null; btn.textContent = label; } }, 3000);
+}
+document.getElementById('btnSample').addEventListener('click', function(){
+  var b = this; armed(b, 'Load sample issue', function(){ state = clone(SAMPLE); smsTouched = false; fill(); render(); toast('Sample issue loaded'); });
+});
+document.getElementById('btnClear').addEventListener('click', function(){
+  var b = this; armed(b, 'Start blank', function(){
+    var keep = {brand:state.brand, tagline:state.tagline, c1:state.c1, c2:state.c2, handle:state.handle, sWeb:state.sWeb, sTik:state.sTik, sIg:state.sIg, sFb:state.sFb, sYt:state.sYt, sTh:state.sTh, sSub:state.sSub, addr:state.addr, unsub:state.unsub, why:state.why, smsFrom:state.smsFrom, smsStop:state.smsStop};
+    state = Object.assign(clone(BLANK), keep, {date:today}); smsTouched = false; fill(); render(); toast('New blank issue. Brand and footer kept.');
+  });
+});
+
+/* ---------- boot ---------- */
+try{ var savedPv = localStorage.getItem(KEY + '-pv'); var pvBtn = savedPv && document.querySelector('[data-pv="' + savedPv + '"]'); if(pvBtn){ pv = savedPv; document.querySelectorAll('[data-pv]').forEach(function(x){ x.setAttribute('aria-pressed', x === pvBtn); }); } }catch(e){}
+fill(); render();
+try{ var savedTab = localStorage.getItem(KEY + '-tab'); if(savedTab && document.getElementById(savedTab)) selectTab(document.getElementById(savedTab)); }catch(e){}
+if(window.claude && typeof window.claude.use === 'function'){
+  window.claude.use('downloads').then(function(d){
+    downloads = d;
+    if(d){ document.getElementById('dlHtml').hidden = false; document.getElementById('saveHint').textContent = 'Save a graphic with its button, or right-click (long-press on a phone) the image.'; }
+    else { document.getElementById('saveHint').textContent = 'To save a graphic, right-click it (long-press on a phone) and choose Save image.'; }
+    if(!document.getElementById('p-social').hidden) renderCards(state);
+  }).catch(function(){});
+} else {
+  /* outside Claude: save files with a normal browser download */
+  downloads = {save:function(o){
+    return new Promise(function(res, rej){
+      try{
+        var blob = o.data instanceof Blob ? o.data : new Blob([o.data], {type:/\.html$/i.test(o.filename) ? 'text/html' : 'application/octet-stream'});
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = o.filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+        res({status:'saved'});
+      }catch(e){ rej({code:'unavailable'}); }
+    });
+  }};
+  document.getElementById('dlHtml').hidden = false;
+  document.getElementById('saveHint').textContent = 'Save a graphic with its button, or right-click (long-press on a phone) the image.';
+}
+})();
+</script>
+
+</body></html>
